@@ -50,7 +50,7 @@ class MLP_ARENA2D(nn.Module):
 
         # Body network
         self.body_net = nn.Sequential(
-            nn.Linear(64, 64),
+            nn.Linear(_L+_RS, 64),
             nn.ReLU(),
             nn.Linear(64, feature_dim),
             nn.ReLU()
@@ -105,7 +105,7 @@ class MLP_ARENA2D_POLICY(ActorCriticPolicy):
         self.ortho_init = True
 
     def _build_mlp_extractor(self) -> None:
-        self.mlp_extractor = MLP_ARENA2D(self.features_dim)
+        self.mlp_extractor = MLP_ARENA2D(64)
 
 
 class DRL_LOCAL_PLANNER(BaseFeaturesExtractor):
