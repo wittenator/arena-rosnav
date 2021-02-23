@@ -20,6 +20,10 @@
   <arg name="timeout_goal"          default="330"/>
   <arg name="timeout_subgoal"       default="30"/>
 
+  <!-- wp for eval -->
+  <arg name="num_wps"          default="20"/>
+  <arg name="dist_to_wp"       default="2"/>
+
   <!-- trival params, you may change it but makes not much sense -->
   <arg name="viz_pub_rate" default="30" />
 
@@ -37,6 +41,8 @@
   <param name="tolerance_approach"    value="$(arg tolerance_approach)"/>
   <param name="timeout_goal"          value="$(arg timeout_goal)"/>
   <param name="timeout_subgoal"       value="$(arg timeout_subgoal)"/>
+  <param name="num_wps"               value="$(arg num_wps)"/>
+  <param name="dist_to_wp"               value="$(arg dist_to_wp)"/>
 
 
   <!-- map server-->

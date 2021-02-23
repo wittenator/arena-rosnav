@@ -41,7 +41,7 @@ Panels:
     Experimental: false
     Name: Time
     SyncMode: 0
-    SyncSource: ""
+    SyncSource: LaserScan
 Preferences:
   PromptSaveOnExit: true
 Toolbars:
@@ -248,7 +248,7 @@ Visualization Manager:
       Radius: 0.029999999329447746
       Shaft Diameter: 0.10000000149011612
       Shaft Length: 0.10000000149011612
-      Topic: /sim_01/kino_astar_path
+      Topic: /sim_1/kino_astar_path
       Unreliable: false
       Value: true
     - Alpha: 1
@@ -335,7 +335,7 @@ Visualization Manager:
       Marker Topic: flatland_server/debug/model/myrobot
       Name: my_robot
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/TF
@@ -604,7 +604,7 @@ Visualization Manager:
       Marker Topic: planning_vis/goal
       Name: Marker
       Namespaces:
-        {}
+        "": true
       Queue Size: 100
       Value: true
     - Class: rviz/Marker
@@ -659,11 +659,11 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 46.04248809814453
+      Scale: 23.263456344604492
       Target Frame: <Fixed Frame>
       Value: TopDownOrtho (rviz)
-      X: 2.9913482666015625
-      Y: -0.8713787198066711
+      X: 10.47403335571289
+      Y: 8.319677352905273
     Saved: ~
 Window Geometry:
   Displays:

@@ -84,7 +84,13 @@ class ObservationCollector():
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
-            
+        
+        self.wps = None
+        self.wp_pose2d = None
+        self.wp_idx = 0
+
+        self._num_wps = rospy.get_param('num_wps')
+        self._dist_to_wp = rospy.get_param('dist_to_wp')
 
     def get_observation_space(self):
         return self.observation_space
@@ -110,14 +116,29 @@ class ObservationCollector():
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
         scan = self._scan.ranges.astype(np.float32)
+
+        # check if waypoint is in range
+        if self.wp_pose2d is not None:
+            rho_wp, theta_wp = ObservationCollector._get_goal_pose_in_robot_frame(
+                self.wp_pose2d, self._robot_pose)
+            self._draw_waypoint(rho_wp)
+        else:
+            rho_wp = 0
+            theta_wp = 0
+
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
-        merged_obs = np.hstack([scan, np.array([rho, theta])])
+        
+        # pass waypoint instead to neural network
+        # subgoal is last waypoint
+        merged_obs = np.hstack([scan, np.array([rho_wp, theta_wp])])
         obs_dict = {}
+        obs_dict['goal'] = self._subgoal
         obs_dict['laser_scan'] = scan
         obs_dict['goal_in_robot_frame'] = [rho, theta]
         obs_dict['global_plan'] = self._globalplan
         obs_dict['robot_pose'] = self._robot_pose
+
         return merged_obs, obs_dict
 
     @staticmethod
@@ -153,6 +174,7 @@ class ObservationCollector():
 
     def callback_global_plan(self, msg_global_plan):
         self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
+        self._get_waypoints()
         return
 
     def callback_scan(self, msg_laserscan):
@@ -190,12 +212,39 @@ class ObservationCollector():
     def process_subgoal_msg(self, msg_Subgoal):
         pose2d = self.pose3D_to_pose2D(msg_Subgoal.pose)
         return pose2d
-    
+
+    def _get_waypoints(self):
+        idx = round(len(self._globalplan)/self._num_wps) # num of waypoints
+        wps = self._globalplan[0::idx]
+        self.wp_idx = 0
+        self.wps = np.append(
+            wps[:-1], [[self._subgoal.x, self._subgoal.y]], axis=0)
+        self._wp_to_posed2D(0)
+        print("drawn new waypoints!")
+
+    def _draw_waypoint(self, rho):
+        if rho < self._dist_to_wp and self.wp_idx < (len(self.wps)-1): # distance to trigger next waypoint
+            self.wp_idx += 1
+            self._wp_to_posed2D(self.wp_idx)
+            print("reached new waypoint!")
+
+    def _wp_to_posed2D(self, index):
+        wp = self.wps[index]
+
+        self.wp_pose2d = Pose2D()
+        self.wp_pose2d.x = wp[0]
+        self.wp_pose2d.y = wp[1]
+
     @staticmethod
     def process_global_plan_msg(globalplan):
         global_plan_2d = list(map(
             lambda p: ObservationCollector.pose3D_to_pose2D(p.pose), globalplan.poses))
         global_plan_np = np.array(list(map(lambda p2d: [p2d.x,p2d.y], global_plan_2d)))
+        
+        # import pickle
+        # with open('globalpath.pickle', 'wb') as handle:
+        #     pickle.dump(global_plan_np, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
         return global_plan_np
 
     @staticmethod
@@ -218,7 +267,6 @@ class ObservationCollector():
             low.extend(space.low.tolist())
             high.extend(space.high.tolist())
         return spaces.Box(np.array(low).flatten(), np.array(high).flatten())
-
 
 if __name__ == '__main__':
 

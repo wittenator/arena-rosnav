@@ -386,7 +386,7 @@ def get_predefined_task(ns: str, mode="random", start_stage: int = 1, PATHS: dic
     if mode == "staged":
         task = StagedRandomTask(
             obstacles_manager, robot_manager, start_stage, PATHS)
-    if mode == "ScenerioTask":
+    if mode == "scenario":
         task = ScenerioTask(obstacles_manager, robot_manager,
-                            PATHS['scenerios_json_path'])
+                            PATHS['scenario'])
     return task

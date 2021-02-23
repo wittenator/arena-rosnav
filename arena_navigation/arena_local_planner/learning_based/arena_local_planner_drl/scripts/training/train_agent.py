@@ -74,7 +74,11 @@ def get_paths(agent_name: str, args) -> dict:
                 dir, 'configs', 'default_settings.yaml'),
         'curriculum': 
             os.path.join(
-                dir, 'configs', 'training_curriculum.yaml')
+                dir, 'configs', 'training_curriculum.yaml'),
+        'scenario':
+            os.path.join(
+                rospkg.RosPack().get_path('simulator_setup'),
+                 'scenerios', 'empty_map_obs10.json')
     }
     # check for mode
     if args.load is None:
@@ -236,7 +240,7 @@ if __name__ == "__main__":
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
         eval_env, 
-        n_eval_episodes=40,         eval_freq=25000, 
+        n_eval_episodes=50,         eval_freq=1, 
         log_path=PATHS.get('eval'), best_model_save_path=PATHS.get('model'), 
         deterministic=True,         callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb)

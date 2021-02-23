@@ -141,7 +141,7 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict):
         f"following keys unused: {redundant_keys}")
     if not isinstance(loaded_hyperparams['discrete_action_space'], bool):
         raise TypeError("Parameter 'discrete_action_space' not of type bool")
-    if not loaded_hyperparams['task_mode'] in ["custom", "random", "staged"]:
+    if not loaded_hyperparams['task_mode'] in ["custom", "random", "staged", "scenario"]:
         raise TypeError("Parameter 'task_mode' has unknown value")
 
 
