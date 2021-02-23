@@ -123,8 +123,8 @@ class ObservationCollector():
                 self.wp_pose2d, self._robot_pose)
             self._draw_waypoint(rho_wp)
         else:
-            rho_wp = 0
-            theta_wp = 0
+            rho_wp = np.inf
+            theta_wp = np.inf
 
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
@@ -226,7 +226,8 @@ class ObservationCollector():
         if rho < self._dist_to_wp and self.wp_idx < (len(self.wps)-1): # distance to trigger next waypoint
             self.wp_idx += 1
             self._wp_to_posed2D(self.wp_idx)
-            print("reached new waypoint!")
+            print(f"reached {self.wp_idx-1}. waypoint (x:"
+            f" {self.wps[self.wp_idx-1][0]} y: {self.wps[self.wp_idx-1][1]}")
 
     def _wp_to_posed2D(self, index):
         wp = self.wps[index]
