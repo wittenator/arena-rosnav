@@ -214,11 +214,14 @@ class ObservationCollector():
         return pose2d
 
     def _get_waypoints(self):
-        idx = round(len(self._globalplan)/self._num_wps) # num of waypoints
-        wps = self._globalplan[0::idx]
         self.wp_idx = 0
-        self.wps = np.append(
-            wps[:-1], [[self._subgoal.x, self._subgoal.y]], axis=0)
+        if self._num_wps > 1:
+            idx = round(len(self._globalplan)/self._num_wps) # num of waypoints
+            wps = self._globalplan[0::idx]
+            self.wps = np.append(
+                wps[:-1], [[self._subgoal.x, self._subgoal.y]], axis=0)
+        else:
+            self.wps = np.array([[self._subgoal.x, self._subgoal.y]])
         self._wp_to_posed2D(0)
         print("drawn new waypoints!")
 
