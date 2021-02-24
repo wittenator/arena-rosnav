@@ -64,7 +64,8 @@ class InitiateNewTrainStage(BaseCallback):
                     
             if ((self.threshhold_type == "rew" and EvalObject.best_mean_reward >= self.upper_threshold) or
                 (self.threshhold_type == "succ" and EvalObject.last_success_rate >= self.upper_threshold)):
-                for task_manager in self.TaskManagers:
-                    task_manager.next_stage()
-                EvalObject.best_mean_reward = -np.inf
-                EvalObject.last_success_rate = -np.inf
+                if self.TaskManagers[0]._curr_stage != self.TaskManagers[0].get_num_stages():
+                    for task_manager in self.TaskManagers:
+                        task_manager.next_stage()
+                    EvalObject.best_mean_reward = -np.inf
+                    EvalObject.last_success_rate = -np.inf

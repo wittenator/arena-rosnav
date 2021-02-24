@@ -150,6 +150,7 @@ def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int =
     Updates parameter of loaded PPO agent
 
     :param model(object, PPO): loaded PPO agent
+    :param PATHS: program relevant paths
     :param params: dictionary containing loaded hyperparams
     :param n_envs: number of parallel environments
     """
