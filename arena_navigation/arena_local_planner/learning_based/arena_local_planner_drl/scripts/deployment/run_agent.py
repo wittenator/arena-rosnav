@@ -17,7 +17,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
 
-    rospy.init_node("run_node")
+    rospy.init_node("run_node", disable_signals=True)
 
     # get paths
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
@@ -42,7 +42,7 @@ if __name__ == "__main__":
     task_manager = get_predefined_task(mode='ScenerioTask', PATHS=PATHS)
     # initialize gym env
     env = DummyVecEnv([lambda: FlatlandEnv(
-        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=100000)])
+        task_manager, PATHS.get('robot_setting'), PATHS.get('robot_as'), params['reward_fnc'], params['discrete_action_space'], goal_radius=0.50, max_steps_per_episode=1000)])
     if params['normalize']:
         env = VecNormalize(env, training=False, norm_obs=True, norm_reward=False, clip_reward=15)
 
@@ -90,7 +90,7 @@ if __name__ == "__main__":
             first_obs = True
             episode += 1
 
-        time.sleep(0.0001)
+        time.sleep(0.01)
         if rospy.is_shutdown():
             print('shutdown')
             break

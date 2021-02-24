@@ -65,7 +65,7 @@ class ObservationCollector():
         
         # topic subscriber: subgoal
         #TODO should we synchoronize it with other topics
-        self._subgoal_sub = message_filters.Subscriber('plan_manager/subgoal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
+        self._subgoal_sub = message_filters.Subscriber('/goal', PoseStamped) #self._subgoal_sub = rospy.Subscriber("subgoal", PoseStamped, self.callback_subgoal)
         self._subgoal_sub.registerCallback(self.callback_subgoal)
         
         # service clients
