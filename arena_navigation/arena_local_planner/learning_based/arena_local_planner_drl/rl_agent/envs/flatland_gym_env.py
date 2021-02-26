@@ -82,6 +82,15 @@ class FlatlandEnv(gym.Env):
         # # get observation
         # obs=self.observation_collector.get_observations()
 
+        # evaluation data
+        self.timesteps = 3000
+        self.time_move_calc = np.array([])
+        self.time_pub_action = np.array([])
+        self.time_get_observation = np.array([])
+        self.time_reward_calc = np.array([])
+
+        self.timestamp_move_calc = None
+
     def setup_by_configuration(self, robot_yaml_path: str, settings_yaml_path: str):
         """get the configuration from the yaml file, including robot radius, discrete action space and continuous action space.
 
@@ -143,16 +152,34 @@ class FlatlandEnv(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        self.timesteps -= 1
+        if self.timesteps == 0:
+            self.calc_time_avg()
+
+        if self.timestamp_move_calc is not None:
+            self.time_move_calc = np.append(
+                self.time_move_calc, (time.time()-self.timestamp_move_calc))
+
+        # pub action       
+        timer_start = time.time()
         if self._is_action_space_discrete:
             action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
-        # wait for new observations
-        s = time.time()
-        merged_obs, obs_dict = self.observation_collector.get_observations()
-        # print("get observation: {}".format(time.time()-s))
 
+        self.time_pub_action = np.append(
+            self.time_pub_action, (time.time()-timer_start))
+
+        # wait for new observations
+        timer_start = time.time()
+        merged_obs, obs_dict = self.observation_collector.get_observations()
+
+        self.time_get_observation = np.append(
+            self.time_get_observation, (time.time()-timer_start))
+        # print("get observation: {}".format(time.time()-s))
+        
         # calculate reward
+        timer_start = time.time()
         reward, reward_info = self.reward_calculator.get_reward(
             obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
             action=action, global_plan=obs_dict['global_plan'], robot_pose=obs_dict['robot_pose'])
@@ -172,6 +199,9 @@ class FlatlandEnv(gym.Env):
             info['is_success'] = 0
             self.reward_calculator.kdtree = None
 
+        self.time_reward_calc = np.append(
+            self.time_reward_calc, (time.time()-timer_start))
+        self.timestamp_move_calc = time.time()
         return merged_obs, reward, done, info
 
     def reset(self):
@@ -189,6 +219,20 @@ class FlatlandEnv(gym.Env):
 
     def close(self):
         pass
+
+    def calc_time_avg(self):
+        avg_pub_action = np.mean(self.time_pub_action)
+        avg_get_observation = np.mean(self.time_get_observation)
+        avg_calc_reward = np.mean(self.time_reward_calc)
+        avg_move_calc = np.mean(self.time_move_calc)
+
+        print("______________________________________________")
+        print(f"avg_pub_action = {avg_pub_action}")
+        print(f"avg_get_observation = {avg_get_observation}")
+        print(f"avg_calc_reward = {avg_calc_reward}")
+        print(f"avg_move_calc = {avg_move_calc}")
+        print("______________________________________________")
+        raise Exception("collected timesteps for time monitoring")
 
 
 if __name__ == '__main__':
