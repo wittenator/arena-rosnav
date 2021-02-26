@@ -223,7 +223,7 @@ class ObservationCollector():
         else:
             self.wps = np.array([[self._subgoal.x, self._subgoal.y]])
         self._wp_to_posed2D(0)
-        print("drawn new waypoints!")
+        #print("drawn new waypoints!")
 
     def _draw_waypoint(self, rho):
         if rho < self._dist_to_wp and self.wp_idx < (len(self.wps)-1): # distance to trigger next waypoint
