@@ -83,7 +83,7 @@ class FlatlandEnv(gym.Env):
         # obs=self.observation_collector.get_observations()
 
         # evaluation data
-        self.timesteps = 3000
+        self.timesteps = 4200
         self.time_move_calc = np.array([])
         self.time_pub_action = np.array([])
         self.time_get_observation = np.array([])
@@ -152,6 +152,8 @@ class FlatlandEnv(gym.Env):
                         1   -   collision with obstacle
                         2   -   goal reached
         """
+        
+
         self.timesteps -= 1
         if self.timesteps == 0:
             self.calc_time_avg()
@@ -162,8 +164,8 @@ class FlatlandEnv(gym.Env):
 
         # pub action       
         timer_start = time.time()
-        if self._is_action_space_discrete:
-            action = self._translate_disc_action(action)
+        # if self._is_action_space_discrete:
+        #     action = self._translate_disc_action(action)
         self._pub_action(action)
         self._steps_curr_episode += 1
 
@@ -223,12 +225,16 @@ class FlatlandEnv(gym.Env):
     def calc_time_avg(self):
         avg_pub_action = np.mean(self.time_pub_action)
         avg_get_observation = np.mean(self.time_get_observation)
+        avg_pre_sync = np.mean(self.observation_collector.time_pre_sync)
+        avg_post_sync = np.mean(self.observation_collector.time_post_sync)
         avg_calc_reward = np.mean(self.time_reward_calc)
         avg_move_calc = np.mean(self.time_move_calc)
 
         print("______________________________________________")
         print(f"avg_pub_action = {avg_pub_action}")
         print(f"avg_get_observation = {avg_get_observation}")
+        print(f"    avg_time_pre_sync = {avg_pre_sync}")
+        print(f"    avg_time_post_sync = {avg_post_sync}")
         print(f"avg_calc_reward = {avg_calc_reward}")
         print(f"avg_move_calc = {avg_move_calc}")
         print("______________________________________________")

@@ -84,12 +84,18 @@ class ObservationCollector():
             self._service_name_step = f'{self.ns_prefix}step_world'
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld)
+        
+        self.time_pre_sync = np.array([])
+        self.time_post_sync = np.array([])
             
 
     def get_observation_space(self):
         return self.observation_space
 
     def get_observations(self):
+        timer = time.time()
+        # time sleep to compensate time difference between train_agent and run_script
+        time.sleep(0.0032)
         def all_sub_received():
             ans = True
             for k, v in self._sub_flags.items():
@@ -107,8 +113,12 @@ class ObservationCollector():
             while not all_sub_received():
                 self._sub_flags_con.wait()  # replace it with wait for later
             reset_sub()
+
+        self.time_pre_sync = np.append(self.time_pre_sync, time.time()-timer)
         # rospy.logdebug(f"Current observation takes {i} steps for Synchronization")
         #print(f"Current observation takes {i} steps for Synchronization")
+        timer = time.time()
+
         scan = self._scan.ranges.astype(np.float32)
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(
             self._subgoal, self._robot_pose)
@@ -118,6 +128,8 @@ class ObservationCollector():
         obs_dict['goal_in_robot_frame'] = [rho, theta]
         obs_dict['global_plan'] = self._globalplan
         obs_dict['robot_pose'] = self._robot_pose
+
+        self.time_post_sync = np.append(self.time_post_sync, time.time()-timer)
         return merged_obs, obs_dict
 
     @staticmethod

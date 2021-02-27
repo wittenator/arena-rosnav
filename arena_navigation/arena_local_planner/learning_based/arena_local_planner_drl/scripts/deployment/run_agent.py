@@ -14,7 +14,7 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.tools.train_agent_utils import *
 
 ### HYPERPARAMETERS ###
-max_steps_per_episode = 2000
+max_steps_per_episode = 1000
 
 if __name__ == "__main__":
     args, _ = parse_run_agent_args()
@@ -26,7 +26,7 @@ if __name__ == "__main__":
         'robot_setting' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'robot', 'myrobot.model.yaml'),
         'robot_as' : os.path.join(rospkg.RosPack().get_path('arena_local_planner_drl'), 'configs', 'default_settings.yaml'),
         'scenerios_json_path' : os.path.join(rospkg.RosPack().get_path('simulator_setup'), 'scenerios', args.scenario+'.json'),
-        'curriculum': os.path.join(dir, 'configs', 'training_curriculum.yaml')
+        'curriculum': os.path.join(dir, 'configs', 'training_curriculum_map1small.yaml')
     }
 
     assert os.path.isfile(
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     print_hyperparameters(params)
 
     # initialize task manager
-    task_manager = get_predefined_task(ns='sim_1', mode='staged', start_stage=4, PATHS=PATHS)
+    task_manager = get_predefined_task(ns='sim_1', mode='staged', start_stage=5, PATHS=PATHS)
     
     # initialize gym env
     env = DummyVecEnv(
@@ -77,9 +77,11 @@ if __name__ == "__main__":
             action = np.maximum(
                 np.minimum(agent.action_space.high, action), agent.action_space.low
                 )
-        
+
         # apply action
         obs, rewards, done, info = env.step(action)
+
+        time.sleep(0.005)
 
         cum_reward += rewards
         
@@ -96,7 +98,7 @@ if __name__ == "__main__":
             env.reset()
             first_obs = True
 
-        time.sleep(0.0001)
+        
         if rospy.is_shutdown():
             print('shutdown')
             break
