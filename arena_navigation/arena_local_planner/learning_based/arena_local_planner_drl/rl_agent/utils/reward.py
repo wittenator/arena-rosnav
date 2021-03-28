@@ -80,29 +80,29 @@ class RewardCalculator():
         self._reward_collision(
             laser_scan)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.5)
+            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.6)
 
     def _cal_reward_rule_01(self, 
                             laser_scan: np.ndarray, 
                             goal_in_robot_frame: Tuple[float,float],
                             *args,**kwargs):
         self._reward_distance_traveled(
-            kwargs['action'], consumption_factor=0.0075)
+            kwargs['action'], consumption_factor=0.01)
         self._reward_goal_reached(
             goal_in_robot_frame, reward=15)
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan, punishment=10)
+            laser_scan, punishment=15)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.5)
+            goal_in_robot_frame, reward_factor=0.5, penalty_factor=0.5)
 
     def _cal_reward_rule_02(self, 
                             laser_scan: np.ndarray, 
                             goal_in_robot_frame: Tuple[float,float],
                             *args,**kwargs):
         self._reward_distance_traveled(
-            kwargs['action'], consumption_factor=0.007)
+            kwargs['action'], consumption_factor=0.0075)
         self._reward_following_global_plan(
             kwargs['global_plan'], kwargs['robot_pose'])
         self._reward_goal_reached(
@@ -112,19 +112,17 @@ class RewardCalculator():
         self._reward_collision(
             laser_scan, punishment=10)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.5)
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.5)
 
     def _cal_reward_rule_03(self, 
                             laser_scan: np.ndarray, 
                             goal_in_robot_frame: Tuple[float,float],
                             *args,**kwargs):
-        self._reward_not_moving(
-            kwargs['action'], punishment=0.0075)
         self._reward_following_global_plan(
             kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
         if laser_scan.min() > self.safe_dist:
             self._reward_distance_global_plan(
-                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.15, penalty_factor=0.25)
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
         else:
             self.last_dist_to_path = None
         self._reward_goal_reached(

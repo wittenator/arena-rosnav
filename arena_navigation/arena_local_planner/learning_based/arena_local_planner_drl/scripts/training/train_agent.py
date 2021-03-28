@@ -207,7 +207,7 @@ if __name__ == "__main__":
     trainstage_cb = InitiateNewTrainStage(
         n_envs=args.n_envs,
         treshhold_type="succ", 
-        upper_threshold=0.9, lower_threshold=0.6, 
+        upper_threshold=0.85, lower_threshold=0.6, 
         task_mode=params['task_mode'], verbose=1)
     
     # stop training on reward threshold callback
@@ -258,7 +258,7 @@ if __name__ == "__main__":
             vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
             gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
             n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
-            tensorboard_log = PATHS['tb'],  verbose = 1
+            tensorboard_log = PATHS['tb'],      verbose = 1
         )
     elif args.agent is not None:
         # predefined agent flag

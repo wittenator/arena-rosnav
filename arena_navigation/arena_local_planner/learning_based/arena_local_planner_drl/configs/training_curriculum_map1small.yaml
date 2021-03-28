@@ -8,16 +8,13 @@
   dynamic: 0
 2:
   static: 0
-  dynamic: 2
+  dynamic: 4
 3:
   static: 0
-  dynamic: 4
+  dynamic: 6
 4:
   static: 0
-  dynamic: 6
-5:
-  static: 0
   dynamic: 8
-6:
+5:
   static: 0
   dynamic: 10
