@@ -270,14 +270,18 @@ if __name__ == "__main__":
                     vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
                     gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
                     n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
-                    tensorboard_log = PATHS['tb'],  verbose = 1
+                    tensorboard_log = PATHS['tb'],      verbose = 1
                 )
 
-        elif args.agent == "DRL_LOCAL_PLANNER" or args.agent == "CNN_NAVREP":
-            if args.agent == "DRL_LOCAL_PLANNER":
-                policy_kwargs = policy_kwargs_drl_local_planner
-            else:
-                policy_kwargs = policy_kwargs_navrep
+        elif args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4']:
+            if args.agent == 'AGENT_1':
+                policy_kwargs = policy_kwargs_agent_1
+            elif args.agent == 'AGENT_2':
+                policy_kwargs = policy_kwargs_agent_2
+            elif args.agent == 'AGENT_3':
+                policy_kwargs = policy_kwargs_agent_3
+            elif args.agent == 'AGENT_4':
+                policy_kwargs = policy_kwargs_agent_4 
 
             model = PPO(
                 "CnnPolicy", env, 
@@ -289,6 +293,27 @@ if __name__ == "__main__":
                 n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
                 tensorboard_log = PATHS.get('tb'),  verbose = 1
             )
+
+        elif args.agent in ['AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8']:
+            if args.agent == 'AGENT_5':
+                policy_kwargs = policy_kwargs_agent_5
+            elif args.agent == 'AGENT_6':
+                policy_kwargs = policy_kwargs_agent_6
+            elif args.agent == 'AGENT_7':
+                policy_kwargs = policy_kwargs_agent_7
+            elif args.agent == 'AGENT_8':
+                policy_kwargs = policy_kwargs_agent_8
+
+            model = PPO(
+            "MlpPolicy", env, 
+            policy_kwargs = policy_kwargs, 
+            gamma = params['gamma'],            n_steps = params['n_steps'], 
+            ent_coef = params['ent_coef'],      learning_rate = params['learning_rate'], 
+            vf_coef = params['vf_coef'],        max_grad_norm = params['max_grad_norm'], 
+            gae_lambda = params['gae_lambda'],  batch_size = params['m_batch_size'], 
+            n_epochs = params['n_epochs'],      clip_range = params['clip_range'], 
+            tensorboard_log = PATHS['tb'],      verbose = 1
+        )
     else:
         # load flag
         if os.path.isfile(
