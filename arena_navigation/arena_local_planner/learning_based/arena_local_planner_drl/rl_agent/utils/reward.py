@@ -110,7 +110,7 @@ class RewardCalculator():
         self._reward_collision(
             laser_scan, punishment=10)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.5)
+            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.4)
 
     def _cal_reward_rule_03(self, 
                             laser_scan: np.ndarray, 
@@ -130,7 +130,7 @@ class RewardCalculator():
         self._reward_collision(
             laser_scan, punishment=10)
         self._reward_goal_approached(
-            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+            goal_in_robot_frame, reward_factor=0.4, penalty_factor=0.4)
         
     def _reward_goal_reached(self,
                              goal_in_robot_frame = Tuple[float,float], 
