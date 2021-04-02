@@ -416,7 +416,8 @@ class AGENT_10(BaseFeaturesExtractor):
 
         # Compute shape by doing one forward pass
         with th.no_grad():
-            n_flatten = self.cnn(th.as_tensor(observation_space.sample()[None]).float()).shape[1]
+            tensor_forward = th.randn(1, 1, _L)
+            n_flatten = self.cnn(tensor_forward).shape[1]
 
         self.fc = nn.Sequential(
             nn.Linear(n_flatten, features_dim),
