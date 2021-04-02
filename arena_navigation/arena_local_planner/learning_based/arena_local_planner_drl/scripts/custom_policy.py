@@ -445,5 +445,5 @@ and value network.
 """
 policy_kwargs_agent_10 = dict(features_extractor_class=AGENT_10,
                               features_extractor_kwargs=dict(features_dim=512),
-                              net_arch=[dict(vf=[64], pi=[64])], 
+                              net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
                               activation_fn=th.nn.ReLU)
