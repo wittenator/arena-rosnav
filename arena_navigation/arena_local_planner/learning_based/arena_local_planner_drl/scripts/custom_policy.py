@@ -444,6 +444,6 @@ and value network.
 :constant policy_kwargs_navrep: (dict)
 """
 policy_kwargs_agent_10 = dict(features_extractor_class=AGENT_10,
-                              features_extractor_kwargs=dict(features_dim=128),
-                              net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
+                              features_extractor_kwargs=dict(features_dim=512),
+                              net_arch=[dict(vf=[64], pi=[64])], 
                               activation_fn=th.nn.ReLU)
