@@ -223,8 +223,6 @@ policy_kwargs_agent_2 = dict(features_extractor_class=AGENT_2,
 class AGENT_3(BaseFeaturesExtractor):
     """
     Custom Convolutional Neural Network to serve as feature extractor ahead of the policy and value network.
-    Architecture was taken as reference from: https://arxiv.org/abs/1808.03841
-    (DRL_LOCAL_PLANNER)
 
     :param observation_space: (gym.Space)
     :param features_dim: (int) Number of features extracted.
@@ -317,6 +315,7 @@ class AGENT_4(BaseFeaturesExtractor):
 
         self.fc = nn.Sequential(
             nn.Linear(n_flatten, features_dim),
+            nn.ReLU(),
         )
 
     def forward(self, observations: th.Tensor) -> th.Tensor:
@@ -379,5 +378,72 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_8 = dict(net_arch=[128, 128, 64, 64, dict(pi=[128, 64], vf=[128, 64])], 
+policy_kwargs_agent_8 = dict(net_arch=[128, 128, 64, 64, dict(pi=[128], vf=[128])], 
                              activation_fn=th.nn.ReLU)
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_drl_local_planner: (dict)
+"""
+policy_kwargs_agent_9 = dict(features_extractor_class=AGENT_1,
+                             features_extractor_kwargs=dict(features_dim=256),
+                             net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
+                             activation_fn=th.nn.ReLU)
+
+class AGENT_10(BaseFeaturesExtractor):
+    """
+    Custom Convolutional Neural Network (Nature CNN) to serve as feature extractor ahead of the policy and value head.
+
+    :param observation_space: (gym.Space)
+    :param features_dim: (int) Number of features extracted.
+        This corresponds to the number of unit for the last layer.
+    """
+
+    def __init__(self, observation_space: gym.spaces.Box, features_dim: int = 32):
+        super(AGENT_10, self).__init__(observation_space, features_dim + _RS)
+
+        self.cnn = nn.Sequential(
+            nn.Conv1d(1, 32, 8, 4),
+            nn.ReLU(),
+            nn.Conv1d(32, 64, 4, 2),
+            nn.ReLU(),
+            nn.Conv1d(64, 64, 3, 1),
+            nn.ReLU(),
+            nn.Flatten(),
+        )
+
+        # Compute shape by doing one forward pass
+        with th.no_grad():
+            n_flatten = self.cnn(th.as_tensor(observation_space.sample()[None]).float()).shape[1]
+
+        self.fc = nn.Sequential(
+            nn.Linear(n_flatten, features_dim),
+            nn.ReLU(),
+        )
+
+    def forward(self, observations: th.Tensor) -> th.Tensor:
+        """
+        :return: (th.Tensor) features,
+            extracted features by the network
+        """
+
+        laser_scan = th.unsqueeze(observations[:, :-_RS], 1)
+        robot_state = observations[:, -_RS:]
+
+        extracted_features = self.fc(self.cnn(laser_scan))
+        features = th.cat((extracted_features, robot_state), 1)
+
+        return features
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_10 = dict(features_extractor_class=AGENT_10,
+                              features_extractor_kwargs=dict(features_dim=128),
+                              net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
+                              activation_fn=th.nn.ReLU)
