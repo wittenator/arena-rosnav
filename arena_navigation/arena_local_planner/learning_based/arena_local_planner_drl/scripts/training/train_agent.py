@@ -294,7 +294,7 @@ if __name__ == "__main__":
                 tensorboard_log = PATHS.get('tb'),  verbose = 1
             )
 
-        elif args.agent in ['AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8']:
+        elif args.agent in ['AGENT_5', 'AGENT_6', 'AGENT_7', 'AGENT_8', 'AGENT_9', 'AGENT_10']:
             if args.agent == 'AGENT_5':
                 policy_kwargs = policy_kwargs_agent_5
             elif args.agent == 'AGENT_6':
@@ -303,6 +303,10 @@ if __name__ == "__main__":
                 policy_kwargs = policy_kwargs_agent_7
             elif args.agent == 'AGENT_8':
                 policy_kwargs = policy_kwargs_agent_8
+            elif args.agent == 'AGENT_9':
+                policy_kwargs = policy_kwargs_agent_9
+            elif args.agent == 'AGENT_10':
+                policy_kwargs = policy_kwargs_agent_10
 
             model = PPO(
             "MlpPolicy", env, 
