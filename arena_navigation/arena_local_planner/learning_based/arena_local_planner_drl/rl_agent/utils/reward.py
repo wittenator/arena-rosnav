@@ -169,8 +169,7 @@ class RewardCalculator():
                 w = reward_factor
             else:
                 w = penalty_factor
-            reward = round(
-                w*(self.last_goal_dist - goal_in_robot_frame[0]), 3)
+            reward = w*(self.last_goal_dist - goal_in_robot_frame[0])
 
             # print("reward_goal_approached:  {}".format(reward))
             self.curr_reward += reward
