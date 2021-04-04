@@ -311,7 +311,7 @@ if __name__ == "__main__":
                 policy_kwargs = policy_kwargs_agent_7
             elif args.agent == 'AGENT_8':
                 policy_kwargs = policy_kwargs_agent_8
-            elif args.agent == 'AGENT_8':
+            elif args.agent == 'AGENT_13':
                 policy_kwargs = policy_kwargs_agent_13
 
             model = PPO(
