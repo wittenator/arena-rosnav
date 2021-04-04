@@ -378,7 +378,7 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_8 = dict(net_arch=[128, 128, 64, 64, dict(pi=[128], vf=[128])], 
+policy_kwargs_agent_8 = dict(net_arch=[64, 64, 64, dict(pi=[64, 64], vf=[64, 64])], 
                              activation_fn=th.nn.ReLU)
 
 """
@@ -448,3 +448,36 @@ policy_kwargs_agent_10 = dict(features_extractor_class=AGENT_10,
                               features_extractor_kwargs=dict(features_dim=512),
                               net_arch=[dict(vf=[128], pi=[128])], 
                               activation_fn=th.nn.ReLU)
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_11 = dict(features_extractor_class=AGENT_10,
+                              features_extractor_kwargs=dict(features_dim=512),
+                              net_arch=[dict(vf=[64, 64], pi=[64, 64])], 
+                              activation_fn=th.nn.ReLU)
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_12 = dict(features_extractor_class=AGENT_10,
+                              features_extractor_kwargs=dict(features_dim=128),
+                              net_arch=[dict(vf=[64], pi=[64])], 
+                              activation_fn=th.nn.ReLU)
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_13 = dict(net_arch=[64, 64, dict(pi=[64, 32], vf=[64, 32])], 
+                              activation_fn=th.nn.ReLU)
+
+
