@@ -212,7 +212,7 @@ if __name__ == "__main__":
     
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=14.5, verbose=1)
+        reward_threshold=16, verbose=1)
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -273,7 +273,7 @@ if __name__ == "__main__":
                     tensorboard_log = PATHS['tb'],      verbose = 1
                 )
 
-        elif args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_17']:
+        elif args.agent in ['AGENT_1', 'AGENT_2', 'AGENT_3', 'AGENT_4', 'AGENT_9', 'AGENT_10', 'AGENT_11', 'AGENT_12', 'AGENT_17', 'AGENT_18']:
             if args.agent == 'AGENT_1':
                 policy_kwargs = policy_kwargs_agent_1
             elif args.agent == 'AGENT_2':
@@ -292,6 +292,8 @@ if __name__ == "__main__":
                 policy_kwargs = policy_kwargs_agent_12
             elif args.agent == 'AGENT_17':
                 policy_kwargs = policy_kwargs_agent_17
+            elif args.agent == 'AGENT_18':
+                policy_kwargs = policy_kwargs_agent_18
 
             model = PPO(
                 "CnnPolicy", env, 
