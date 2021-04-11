@@ -27,6 +27,7 @@ class RewardCalculator():
         self.goal_radius = goal_radius
         self.last_goal_dist = None
         self.last_dist_to_path = None
+        self.last_action = None
         self.safe_dist = safe_dist
 
         self.kdtree = None
@@ -36,6 +37,7 @@ class RewardCalculator():
             'rule_01': RewardCalculator._cal_reward_rule_01,
             'rule_02': RewardCalculator._cal_reward_rule_02,
             'rule_03': RewardCalculator._cal_reward_rule_03,
+            'rule_04': RewardCalculator._cal_reward_rule_04,
             }
         self.cal_func = self._cal_funcs[rule]
 
@@ -45,6 +47,7 @@ class RewardCalculator():
         """
         self.last_goal_dist = None
         self.last_dist_to_path = None
+        self.last_action = None
 
     def _reset(self):
         """
@@ -116,6 +119,28 @@ class RewardCalculator():
                             laser_scan: np.ndarray, 
                             goal_in_robot_frame: Tuple[float,float],
                             *args,**kwargs):
+        self._reward_following_global_plan(
+            kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
+        if laser_scan.min() > self.safe_dist:
+            self._reward_distance_global_plan(
+                kwargs['global_plan'], kwargs['robot_pose'], reward_factor=0.2, penalty_factor=0.3)
+        else:
+            self.last_dist_to_path = None
+        self._reward_goal_reached(
+            goal_in_robot_frame, reward=15)
+        self._reward_safe_dist(
+            laser_scan, punishment=0.25)
+        self._reward_collision(
+            laser_scan, punishment=10)
+        self._reward_goal_approached(
+            goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
+
+    def _cal_reward_rule_04(self, 
+                             laser_scan: np.ndarray, 
+                             goal_in_robot_frame: Tuple[float,float],
+                             *args,**kwargs):
+        self._reward_abrupt_direction_change(
+            kwargs['action'])
         self._reward_following_global_plan(
             kwargs['global_plan'], kwargs['robot_pose'], kwargs['action'])
         if laser_scan.min() > self.safe_dist:
@@ -299,4 +324,17 @@ class RewardCalculator():
         dist, index = self.kdtree.query([robot_pose.x, robot_pose.y])
         return dist, index
 
+    def _reward_abrupt_direction_change(self,
+                                        action: np.array=None):
+        """
+        Applies a penalty when an abrupt change of direction occured.
+        
+        :param action: (np.ndarray (,2)): [0] = linear velocity, [1] = angular velocity 
+        """
+        if self.last_action is not None:
+            curr_ang_vel = action[1]
+            last_ang_vel = self.last_action[1]
 
+            vel_diff = abs(curr_ang_vel-last_ang_vel)
+            self.curr_reward -= (vel_diff**4)/2500
+        self.last_action = action
