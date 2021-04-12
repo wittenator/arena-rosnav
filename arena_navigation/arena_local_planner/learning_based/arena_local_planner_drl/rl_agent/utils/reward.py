@@ -48,6 +48,7 @@ class RewardCalculator():
         self.last_goal_dist = None
         self.last_dist_to_path = None
         self.last_action = None
+        self.kdtree = None
 
     def _reset(self):
         """
@@ -79,7 +80,7 @@ class RewardCalculator():
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan)
+            laser_scan, extended_eval=kwargs['extended_eval'])
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
@@ -94,7 +95,7 @@ class RewardCalculator():
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan, punishment=10)
+            laser_scan, punishment=10, extended_eval=kwargs['extended_eval'])
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
@@ -111,7 +112,7 @@ class RewardCalculator():
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan, punishment=10)
+            laser_scan, punishment=10, extended_eval=kwargs['extended_eval'])
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
@@ -131,7 +132,7 @@ class RewardCalculator():
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan, punishment=10)
+            laser_scan, punishment=10, extended_eval=kwargs['extended_eval'])
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
 
@@ -153,7 +154,7 @@ class RewardCalculator():
         self._reward_safe_dist(
             laser_scan, punishment=0.25)
         self._reward_collision(
-            laser_scan, punishment=10)
+            laser_scan, punishment=10, extended_eval=kwargs['extended_eval'])
         self._reward_goal_approached(
             goal_in_robot_frame, reward_factor=0.3, penalty_factor=0.4)
         
@@ -202,7 +203,8 @@ class RewardCalculator():
 
     def _reward_collision(self,
                           laser_scan: np.ndarray, 
-                          punishment: float=10):
+                          punishment: float=10,
+                          extended_eval: bool=False):
         """
         Reward for colliding with an obstacle.
         
@@ -211,9 +213,12 @@ class RewardCalculator():
         """
         if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
-            self.info['is_done'] = True
-            self.info['done_reason'] = 1
-            self.info['is_success'] = 0
+            if not extended_eval:
+                self.info['is_done'] = True
+                self.info['done_reason'] = 1
+                self.info['is_success'] = 0
+            else:
+                self.info['crash'] = True
 
     def _reward_safe_dist(self, 
                           laser_scan: np.ndarray, 
