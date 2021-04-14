@@ -272,6 +272,9 @@ class ScenerioTask(ABSTask):
                 self._idx_curr_scene += 1
                 scenerio_data = self._scenerios_data[self._idx_curr_scene]
                 scenerio_name = scenerio_data['scene_name']
+                print(f"======================================================")
+                print(f"Scenario '{scenerio_name}' loaded")
+                print(f"======================================================")
                 # use can set "repeats" to a non-positive value to disable the scenerio
                 if scenerio_data["repeats"] > 0:
                     # set obstacles
