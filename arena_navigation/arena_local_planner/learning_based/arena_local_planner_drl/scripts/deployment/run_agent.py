@@ -18,10 +18,10 @@ from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl
 ### HYPERPARAMETERS ###
 AGENTS = ['AGENT_1_2021_04_02__22_03', 'AGENT_2_2021_03_30__23_10', 'AGENT_3_2021_04_01__08_06', 'AGENT_4_2021_04_02__01_07', 
     'AGENT_5_2021_03_31__18_52', 'AGENT_6_2021_04_04__02_12', 'AGENT_7_2021_04_06__07_00', 'AGENT_8_2021_04_05__22_11', 'AGENT_9_2021_04_04__11_09', 
-    'AGENT_10_2021_04_03__16_57', 'AGENT_11_2021_04_03__01_05', 'AGENT_12_2021_04_05__12_08', 'AGENT_13_2021_04_04__18_04', 'AGENT_14_2021_04_07__01_17', 
+    'AGENT_10_2021_04_03__16_57', 'AGENT_11_2021_04_14__20_13', 'AGENT_12_2021_04_05__12_08', 'AGENT_13_2021_04_04__18_04', 'AGENT_14_2021_04_07__01_17', 
     'AGENT_15_2021_04_08__01_27', 'AGENT_16_2021_04_09__22_24', 'AGENT_17_2021_04_10__15_36', 'AGENT_18_2021_04_11__13_54', 'AGENT_19_2021_04_12__13_17']
-max_steps_per_episode = 3000
-eval_episodes = 10000
+max_steps_per_episode = 1250
+eval_episodes = 500
 
 def get_paths(args: dict, AGENT: str):
     dir = rospkg.RosPack().get_path('arena_local_planner_drl')
@@ -53,13 +53,13 @@ def make_env(PATHS: dict,
     def _init():
         env = FlatlandEnv(
             'eval_sim', PATHS.get('robot_setting'), PATHS.get('robot_as'), PARAMS['reward_fnc'], PARAMS['discrete_action_space'], 
-            goal_radius=0.3, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='scenario', PATHS=PATHS, curr_stage=5,
+            goal_radius=0.4, max_steps_per_episode=max_steps_per_episode, train_mode=False, task_mode='staged', PATHS=PATHS, curr_stage=4,
             extended_eval=True)
         if log:
             # eval env
             env = Monitor(
                 env, PATHS['log'], False, 
-                info_keywords=("collisions", "distance_travelled", "time", "done_reason", "is_success"))
+                info_keywords=("collisions", "distance_travelled", "time_safe_dist", "time", "done_reason", "is_success"))
         return env
     return _init
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
         assert os.path.isfile(
             os.path.join(PATHS['model'], "best_model.zip")), "No model file found in %s" % PATHS['model']
         assert os.path.isfile(
-            PATHS['scenario']), "No scenario file named %s" % PATHS['scenerios_json_path']
+            PATHS['scenario']), "No scenario file named %s" % PATHS['scenario']
 
         PARAMS = load_hyperparameters_json(PATHS)
         print_hyperparameters(PARAMS)
@@ -100,7 +100,7 @@ if __name__ == "__main__":
                 model=agent,
                 env=env,
                 n_eval_episodes=eval_episodes,
-                deterministic=True,
+                deterministic=True
             )
         except StopReset:
             pass

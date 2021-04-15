@@ -215,12 +215,12 @@ class RewardCalculator():
         if laser_scan.min() <= self.robot_radius:
             self.curr_reward -= punishment
             
-            if not self._extended_eval:
-                self.info['is_done'] = True
-                self.info['done_reason'] = 1
-                self.info['is_success'] = 0
-            else:
-                self.info['crash'] = True
+            # if not self._extended_eval:
+            self.info['is_done'] = True
+            self.info['done_reason'] = 1
+            self.info['is_success'] = 0
+            # else:
+            self.info['crash'] = True
 
     def _reward_safe_dist(self, 
                           laser_scan: np.ndarray, 
