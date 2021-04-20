@@ -553,7 +553,7 @@ and value network.
 
 :constant policy_kwargs_navrep: (dict)
 """
-policy_kwargs_agent_21 = dict(net_arch=[512, 512, 512, dict(pi=[512, 512], vf=[512, 512])], 
+policy_kwargs_agent_21 = dict(net_arch=[512, 512, 512, dict(pi=[512], vf=[512])], 
                               activation_fn=th.nn.ReLU)
 
 class AGENT_22(BaseFeaturesExtractor):
