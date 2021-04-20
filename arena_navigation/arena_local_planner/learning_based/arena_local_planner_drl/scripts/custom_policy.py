@@ -546,3 +546,12 @@ and value network.
 """
 policy_kwargs_agent_20 = dict(net_arch=[128, 128, 128, 128, dict(pi=[64, 64, 64], vf=[64, 64, 64])], 
                               activation_fn=th.nn.ReLU)
+
+"""
+Global constant to be passed as an argument to the PPO of Stable-Baselines3 in order to build both the policy
+and value network.
+
+:constant policy_kwargs_navrep: (dict)
+"""
+policy_kwargs_agent_21 = dict(net_arch=[512, 512, 512, dict(pi=[512, 512], vf=[512, 512])], 
+                              activation_fn=th.nn.ReLU)
