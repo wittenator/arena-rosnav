@@ -152,6 +152,11 @@ class StagedRandomTask(RandomTask):
         self._sub_next = rospy.Subscriber(f"{self.ns_prefix}next_stage", Bool, self.next_stage)
         self._sub_previous = rospy.Subscriber(f"{self.ns_prefix}previous_stage", Bool, self.previous_stage)
 
+        # dyn obs settings
+        self._dyn_obs_min_radius = 0.3
+        self._dyn_obs_max_radius = 0.3
+        self._dyn_obs_vel = 0.3
+
         self._initiate_stage()
 
     def next_stage(self, msg: Bool):
@@ -193,8 +198,18 @@ class StagedRandomTask(RandomTask):
 
         self.obstacles_manager.register_random_static_obstacles(
             self._stages[self._curr_stage]['static'])
+
+        if len(self._stages) > 5:
+            if self._curr_stage == 7:
+                self._dyn_obs_vel = 0.4
+            else:
+                self._dyn_obs_vel = 0.3
+
         self.obstacles_manager.register_random_dynamic_obstacles(
-            self._stages[self._curr_stage]['dynamic'])
+            self._stages[self._curr_stage]['dynamic'],
+            linear_velocity=self._dyn_obs_vel,
+            min_obstacle_radius=self._dyn_obs_min_radius,
+            max_obstacle_radius=self._dyn_obs_max_radius)
 
         print(
             f"({self.ns}) Stage {self._curr_stage}: Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!")
