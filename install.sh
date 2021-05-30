@@ -1,7 +1,8 @@
 #!/bin/bash
 
 mkdir -p catkin_ws/src && cd catkin_ws/src
-git clone --single-branch --branch sim_to_real --depth 1 git@github.com:wittenator/arena-rosnav.git
+cp -r ../../arena-rosnav/ .
+#git clone --single-branch --branch sim_to_real --depth 1 git@github.com:wittenator/arena-rosnav.git
 cd arena-rosnav
 
 sudo add-apt-repository universe
