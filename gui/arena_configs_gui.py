@@ -10,6 +10,7 @@ import json
 import yaml
 import numpy as np
 import copy
+from FlatlandModelEditor import FlatlandModelEditor
 
 
 def get_value_qspin_box(x) :
@@ -159,6 +160,7 @@ class Window1(QWidget):
             
             else :
             ### reset all widgets out of window 1 ###
+                clear_layout(self.grid_advanced_group_box)
                 clear_layout(self.grid1)
                 myFont=QFont()
                 myFont.setBold(True)
@@ -175,10 +177,12 @@ class Window1(QWidget):
                 
  
 
-                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],'tell story probability':[QSlider(Qt.Horizontal),QLabel('')]
-                ,'group talking probability':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking probability':[QSlider(Qt.Horizontal),QLabel('')]
-                ,'max talking distance':[QSlider(Qt.Horizontal),QLabel('')],'talking base time':[QSlider(Qt.Horizontal),QLabel('')],'tell story base time':[QSlider(Qt.Horizontal),QLabel('')]
-                ,'group talking base time':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking base time':[QSlider(Qt.Horizontal),QLabel('')]}
+                self.advanced_group_box_widgets = {'vmax':[QSlider(Qt.Horizontal),QLabel('')],'chatting probability':[QSlider(Qt.Horizontal),QLabel('')],
+                'tell story probability':[QSlider(Qt.Horizontal),QLabel('')],'group talking probability':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'talking and walking probability':[QSlider(Qt.Horizontal),QLabel('')], 'requesting service probability':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'max talking distance':[QSlider(Qt.Horizontal),QLabel('')],'max servicing radius':[QSlider(Qt.Horizontal),QLabel('')],'talking base time':[QSlider(Qt.Horizontal),QLabel('')],'tell story base time':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'group talking base time':[QSlider(Qt.Horizontal),QLabel('')],'talking and walking base time':[QSlider(Qt.Horizontal),QLabel('')],'receiving service base time':[QSlider(Qt.Horizontal),QLabel('')]
+                ,'requesting service base time':[QSlider(Qt.Horizontal),QLabel('')],'use danger zone':[QSlider(Qt.Horizontal),QLabel('')]}
 
                 for i,item in enumerate(list(self.advanced_group_box_widgets.items())):
                     self.grid_advanced_group_box.addWidget(QLabel(item[0]),i,0)
@@ -193,11 +197,17 @@ class Window1(QWidget):
                     value = 0
                     if item[0] in ['vmax'] :
                         value = ( w.advanced_configs[item[0]] -1)* 10 +0.1
-                    elif item[0] in ['max talking distance'] :
-                        value =( w.advanced_configs[item[0]]-1)* 5
-                    
+                    elif item[0] in ['max talking distance','max servicing radius'] :
+                        value =( w.advanced_configs[item[0]]-1)* 5                    
                     elif item[0] in ['chatting probability','tell story probability','group talking probability','talking and walking probability'] :
-                        value =   w.advanced_configs[item[0]]*10
+                        value =   w.advanced_configs[item[0]]*10            
+                    elif item[0] in ['requesting service probability'] :
+                        value =   w.advanced_configs[item[0]]*500                  
+                    elif item[0] in ['use danger zone'] :
+                        value =   w.advanced_configs[item[0]]
+                        item[1][0].setMinimum(0)
+                        item[1][0].setMaximum(1)
+                   
                     else :
                         value =   w.advanced_configs[item[0]] / 2
                     item[1][0].setValue(value)
@@ -225,17 +235,23 @@ class Window1(QWidget):
                 self.training_curriculum_widgets =[]
                 w.obstacles_spawning_parameters = dict()
                 stages_values = list(w._stages.values())
+                self.num_obstacles_widgets =[]
                 for i in range(int(self.num_stages_edit.text())) :         
                     self.new_widgets = [QPushButton('stage num '+ str(i+1)),QSpinBox(),QSpinBox(),QSpinBox()]
                     self.new_widgets[0].clicked.connect(partial(self.on_button_stage_clicked,'Stage '+ str(i+1),i))
-                    self.new_widgets[1].setValue(0)
-                    self.new_widgets[2].setValue(5)
-                    self.new_widgets[3].setValue(2)
+                    self.num_obstacles_widgets.append(self.new_widgets)
                     self.training_curriculum_widgets = self.training_curriculum_widgets +[self.new_widgets]
                     if i < len(stages_values)  and stages_values[i] is not None :
                         self.new_widgets[1].setValue(stages_values[i]['static'])
+                        self.new_widgets[1].setObjectName(str(i))
+                        self.new_widgets[1].textChanged.connect(self.update_obstacles_spawning_parameters)
                         self.new_widgets[2].setValue(stages_values[i]['dynamic_human'])
+                        self.new_widgets[2].setObjectName(str(i))
+                        self.new_widgets[2].textChanged.connect(self.update_obstacles_spawning_parameters)
                         self.new_widgets[3].setValue(stages_values[i]['dynamic_robot'])
+                        self.new_widgets[3].setObjectName(str(i))
+                        self.new_widgets[3].textChanged.connect(self.update_obstacles_spawning_parameters)
+                        
                     for j in range(4):
                         grid.addWidget(self.new_widgets[j], i+2, j,Qt.AlignTop)
                    
@@ -264,7 +280,27 @@ class Window1(QWidget):
 
                 self.grid1.addWidget(self.group_box_obstacles,2,0,2,2)
 
-
+    def update_obstacles_spawning_parameters(self) :
+        i = int(self.sender().objectName())
+        widgets= self.num_obstacles_widgets[i]
+        available_models_copy = copy.deepcopy(w.available_models)
+        for x, available_models_copy_key in enumerate(list(available_models_copy.keys())) : 
+                    obstacles_count = widgets[x+1].value()
+                    
+                    ### check if ther no available models fro mthis type and divide th num obstacles in window on equally upon the duffrent available model of each type ###
+                    if available_models_copy[available_models_copy_key] is not  None :
+                        
+                        for item in  list(available_models_copy[available_models_copy_key].items()) :
+                            available_models_copy[available_models_copy_key][ item[0]]= [0,item[1]]
+                            
+                        while  obstacles_count> 0 :
+                            for item in  list(available_models_copy[available_models_copy_key].items()) :
+                                if  obstacles_count== 0 :
+                                    break
+                                available_models_copy[available_models_copy_key][ item[0]][0]= item[1][0]+1                        
+                                obstacles_count = obstacles_count -1
+                        
+        w.obstacles_spawning_parameters[i+1] = available_models_copy
     def updateLabel(self,value):
 
                
@@ -272,11 +308,15 @@ class Window1(QWidget):
 
         if key in ['vmax'] :
             value = 1 +  value/ 10
-        elif key in ['max talking distance'] :
+        elif key in ['max talking distance','max servicing radius'] :
             value = 1+ value/ 5
         
         elif key in ['chatting probability','tell story probability','group talking probability','talking and walking probability'] :
             value =   value/10
+        elif key in ['requesting service probability'] :
+            value =   value/500 
+        elif key in ['use danger zone'] :
+            value =   value== 1.0
         else :
             value =   value * 2
 
@@ -321,7 +361,17 @@ class Window1(QWidget):
             
             advanced_configs ={}
             for item in list(self.advanced_group_box_widgets.items()) :
-                advanced_configs[item[0]]=float(item[1][1].text())
+                if (item[1][1].text() == "True") :
+                    advanced_configs[item[0]]=1.0
+                elif (item[1][1].text() == "False") :
+                    advanced_configs[item[0]]=0.0
+                else :
+                    advanced_configs[item[0]]=float(item[1][1].text())
+
+
+            # self.training_curriculum_widgets
+            
+            
             
             write_stages_to_yaml(new_stages)
             write_obstacles_spawning_parameters_to_yaml(w.obstacles_spawning_parameters)
@@ -450,7 +500,7 @@ class main_window(QMainWindow):
         ### add diffrent buttons to the main window and link them to functions ###
         self.button1 = QPushButton('Edit Training Curriculum')
         self.button1.clicked.connect(self.on_button1_clicked)
-        self.button2 = QPushButton('Edit Obstacles Profiles')
+        self.button2 = QPushButton('Edit Flatland Models')
         self.button2.clicked.connect(self.on_button2_clicked)
         self.button3 = QPushButton('Create New Model')
         self.button3.clicked.connect(self.on_button3_clicked)
@@ -478,11 +528,9 @@ class main_window(QMainWindow):
             self.w = None  # Discard reference.
 
     def on_button2_clicked(self, checked):
-
         if self.w is None:
-            self.window2 = SubWindow()
-            self.window2.setWindowTitle('Obstacles Profiles Configs')
-            self.window2.show()
+            self.flatland_model_editor_window = FlatlandModelEditor()
+            self.flatland_model_editor_window.show()
         else:
             self.w.close()  # Close window.
             self.w = None  # Discard reference.

@@ -6,25 +6,15 @@ bodies:
       - type: polygon
         points: [[-0.75, 0.45], [0.75, 0.45], [0.75, -0.45], [-0.75, -0.45]]
         density: 1
-        layers: []
-
-  - name: left_fork
-    color: [1, 0.8, 0, 0.8]
-
-    footprints:
+        layers: ["static"]
       - type: polygon
         points: [[0.75, 0.45], [1.4, 0.45], [1.4, 0.2], [0.75, 0.2]]
         density: 1
-        layers: []
-
-  - name: right_fork
-    color: [1, 0.8, 0, 0.8]
-
-    footprints:
+        layers: ["static"]
       - type: polygon
         points: [[0.75, -0.2], [1.4, -0.2], [1.4, -0.45], [0.75, -0.45]]
         density: 1
-        layers: []
+        layers: ["static"]
 
   - name: safety_dist_circle
     pose: [3, 0, 0]
@@ -37,22 +27,6 @@ bodies:
         density: 1
         layers: ["static"]
         collision: false	
-
-joints:
-  - type: weld
-    name: left_fork_weld
-    bodies:
-      - name: base
-        anchor: [0.75, 0.45]
-      - name: left_fork
-        anchor: [0.75, 0.45]
-  - type: weld
-    name: right_fork_weld
-    bodies:
-      - name: base
-        anchor: [0.75, -0.45]
-      - name: right_fork
-        anchor: [0.75, -0.45]
 
 plugins:
   - type: VehicleMovement

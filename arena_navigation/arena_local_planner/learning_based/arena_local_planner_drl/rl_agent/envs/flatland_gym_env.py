@@ -107,7 +107,7 @@ class FlatlandEnv(gym.Env):
         num_humans=self.task.obstacles_manager.num_humans
         num_robo_obstacles=self.task.obstacles_manager.num_robo_obstacles
         self.observation_collector = ObservationCollector(
-            self.ns, num_humans,num_robo_obstacles)
+            self.ns,kwargs['curr_stage'] )
         self.observation_collector.setRobotSettings(self._laser_num_beams, self._laser_max_range,
                                                                                                     self.laser_angle_min, self.laser_angle_max, 
                                                                                                     self.laser_angle_increment)
@@ -223,12 +223,16 @@ class FlatlandEnv(gym.Env):
         #tell the robot how long it has passed
         self.observation_collector.set_timestep(self._steps_curr_episode/self._max_steps_per_episode)
         # wait for new observations
+        while  rospy.get_param("/_initiating_stage") == True : 
+            print('################ waiting for _initiating_stage #######################')
+            time.sleep(1)
         merged_obs, obs_dict = self.observation_collector.get_observations()
+
 
         # calculate reward
         reward, reward_info = self.reward_calculator.get_reward(
-            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], obs_dict['adult_in_robot_frame'],
-            obs_dict['child_in_robot_frame'],obs_dict['elder_in_robot_frame'], self._steps_curr_episode/self._max_steps_per_episode
+            obs_dict['laser_scan'], obs_dict['goal_in_robot_frame'], 
+            obs_dict['human_obstacles_in_robot_frame'], obs_dict['robot_obstacles_in_robot_frame'],obs_dict["robot_velocity"],self._steps_curr_episode/self._max_steps_per_episode
         )
         done = reward_info['is_done']
         # print("cum_reward:  {}".format(reward))
@@ -257,7 +261,6 @@ class FlatlandEnv(gym.Env):
         return merged_obs, reward, done, info
 
     def reset(self):
-
         # set task
         # regenerate start position end goal position of the robot and change the obstacles and ped accordingly
         self._episode += 1
