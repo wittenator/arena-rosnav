@@ -23,6 +23,8 @@ plugins:
     odom_frame_id: odom
     odom_pub: odom  # topic odom is published on
     pub_rate: 100
+    twist_sub: cmd_vel
+
   
   - type: Laser
     name: static_laser

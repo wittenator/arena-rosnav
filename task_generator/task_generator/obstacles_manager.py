@@ -90,8 +90,8 @@ class ObstaclesManager:
             1 if obstacle_name.startswith(name_prefix) else 0
             for obstacle_name in self.obstacle_name_list)
 
+        max_num_try = 2
         for instance_idx in range(count_same_type, count_same_type + num_obstacles):
-            max_num_try = 2
             i_curr_try = 0
             while i_curr_try < max_num_try:
                 spawn_request = SpawnModelRequest()
@@ -100,7 +100,7 @@ class ObstaclesManager:
                 spawn_request.ns = rospy.get_namespace()
                 # x, y, theta = get_random_pos_on_map(self._free_space_indices, self.map,)
                 # set the postion of the obstacle out of the map to hidden them
-                if len(start_pos) == 0:
+                if not start_pos:
                     x = self.map.info.origin.position.x - 3 * \
                         self.map.info.resolution * self.map.info.height
                     y = self.map.info.origin.position.y - 3 * \
