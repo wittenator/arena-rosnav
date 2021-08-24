@@ -1,4 +1,5 @@
 from pettingzoo import *
+from pettingzoo.utils import agent_selector
 from pettingzoo.utils.env import AECIterable, AECIterator
 
 

@@ -8,8 +8,7 @@ import rospkg
 import tf
 import yaml
 
-from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel
-from flatland_msgs.srv import StepWorld
+from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel, StepWorld
 from geometry_msgs.msg import Pose2D, PoseStamped
 from nav_msgs.msg import OccupancyGrid
 
@@ -23,7 +22,6 @@ class RobotManager:
     A manager class using flatland provided services to spawn, move and delete Robot. Currently only one robot
     is managed
     """
-
     def __init__(
         self, 
         ns: str, 
@@ -31,7 +29,7 @@ class RobotManager:
         robot_yaml_path: str, 
         robot_name: str="myrobot", 
         timeout=20
-    ):
+    ) -> None:
         """[summary]
 
         Args:
@@ -59,16 +57,20 @@ class RobotManager:
         rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
         rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=timeout)
         self._srv_move_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}move_model', MoveModel)
+            f'{self.ns_prefix}move_model', MoveModel
+        )
         self._srv_spawn_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}spawn_model', SpawnModel)
+            f'{self.ns_prefix}spawn_model', SpawnModel
+        )
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(
-            f'{self.ns_prefix}step_world', StepWorld)
+            f'{self.ns_prefix}step_world', StepWorld
+        )
 
         # publisher
         self._goal_pub = rospy.Publisher(
-            f'{self.ns_prefix}goal', PoseStamped, queue_size=1, latch=True)
+            f'{self.ns_prefix}goal', PoseStamped, queue_size=1, latch=True
+        )
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -77,15 +79,15 @@ class RobotManager:
         if MARL:
             os.remove(robot_yaml_path)
 
-    def _spawn_robot(self, robot_yaml_path: str):
+    def _spawn_robot(self, robot_yaml_path: str) -> None:
         request = SpawnModelRequest()
         request.yaml_path = robot_yaml_path
         request.name = self.ROBOT_NAME
         request.ns = self.ns
         self._srv_spawn_model(request)
 
-    def _get_robot_config(self, robot_yaml_path):
-        """get robot info e.g robot name, radius, Laser related infomation
+    def _get_robot_config(self, robot_yaml_path: str) -> None:
+        """Get robot info e.g robot name, radius, Laser related infomation
 
         Args:
             robot_yaml_path ([type]): [description]
@@ -98,19 +100,21 @@ class RobotManager:
                     for footprint in body['footprints']:
                         if footprint['type'] == 'circle':
                             self.ROBOT_RADIUS = footprint.setdefault(
-                                'radius', 0.2)
+                                'radius', 0.2
+                            )
             # get laser_update_rate
             for plugin in self._robot_data['plugins']:
                 if plugin['type'] == 'Laser':
                     self.LASER_UPDATE_RATE = plugin.setdefault(
-                        'update_rate', 1)
+                        'update_rate', 1
+                    )
 
     def _generate_robot_config_with_adjusted_topics(self) -> str:
-        """Generates a robot-specific config file (yaml) where the publication\
+        """Generates a robot-specific config file (yaml) where the publication \
             and subscription topics are adjusted with the robot's namespace.
 
         Returns:
-            str: Path of the robot-specific adjusted config file 
+            str: Path of the robot-specific adjusted config file.
 
         Note:
         - The namespaces consist of: [simulation ns] / [robot name] / *topic*\
@@ -130,7 +134,6 @@ class RobotManager:
         )
         os.makedirs(tmp_folder_path, exist_ok=True)
         tmp_config_name = self.ROBOT_NAME + ".robot_config.yaml" 
-
         tmp_config_path = os.path.join(tmp_folder_path, tmp_config_name)
 
         with open(tmp_config_path, 'w') as fd:
@@ -144,10 +147,10 @@ class RobotManager:
         self._free_space_indices = generate_freespace_indices(self.map)
 
     def move_robot(self, pose: Pose2D):
-        """move the robot to a given position
+        """Move the robot to a given position.
 
         Args:
-            pose (Pose2D): target postion
+            pose (Pose2D): Target postion.
         """
         # call service move_model
 
@@ -175,7 +178,7 @@ class RobotManager:
 
     def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
                                = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
-        """set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
+        """Set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
         Args:

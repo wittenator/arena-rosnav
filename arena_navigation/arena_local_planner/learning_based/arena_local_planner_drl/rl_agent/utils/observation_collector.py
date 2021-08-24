@@ -62,8 +62,6 @@ class ObservationCollector:
         )
 
         self._laser_num_beams = num_lidar_beams
-        # for frequency controlling
-        self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
         self._clock = Clock()
         self._scan = LaserScan()
@@ -72,13 +70,10 @@ class ObservationCollector:
         self._subgoal = Pose2D()
         self._globalplan = np.array([])
 
-        # train mode?
-        self._is_train_mode = rospy.get_param("/train_mode")
-
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent
         self.max_deque_size = 10
-        self._sync_slop = 0.05
+        self._sync_slop = 0.1
 
         self._laser_deque = deque()
         self._rs_deque = deque()
@@ -106,26 +101,10 @@ class ObservationCollector:
             f"{self.ns_prefix}globalPlan", Path, self.callback_global_plan
         )
 
-        # service clients
-        if self._is_train_mode:
-            self._service_name_step = f"{self.ns_prefix}step_world"
-            self._sim_step_client = rospy.ServiceProxy(
-                self._service_name_step, StepWorld
-            )
-
     def get_observation_space(self):
         return self.observation_space
 
     def get_observations(self):
-        # apply action time horizon
-        if self._is_train_mode:
-            self.call_service_takeSimStep(self._action_frequency)
-        else:
-            try:
-                rospy.wait_for_message(f"{self.ns_prefix}next_cycle", Bool)
-            except Exception:
-                pass
-
         # try to retrieve sync'ed obs
         laser_scan, robot_pose = self.get_sync_obs()
         if laser_scan is not None and robot_pose is not None:
@@ -198,25 +177,6 @@ class ObservationCollector:
 
         # print(f"Laser_stamp: {laser_stamp}, Robot_stamp: {robot_stamp}")
         return laser_scan, robot_pose
-
-    def call_service_takeSimStep(self, t=None):
-        request = StepWorldRequest() if t is None else StepWorldRequest(t)
-        timeout = 12
-        try:
-            for i in range(timeout):
-                response = self._sim_step_client(request)
-                rospy.logdebug("step service=", response)
-
-                if response.success:
-                    break
-                if i == timeout - 1:
-                    raise TimeoutError(
-                        f"Timeout while trying to call '{self.ns_prefix}step_world'"
-                    )
-                time.sleep(0.33)
-
-        except rospy.ServiceException as e:
-            rospy.logdebug("step Service call failed: %s" % e)
 
     def callback_clock(self, msg_Clock):
         self._clock = msg_Clock.clock.to_sec()

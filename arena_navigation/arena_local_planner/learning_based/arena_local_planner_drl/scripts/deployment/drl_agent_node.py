@@ -12,13 +12,16 @@ import yaml
 
 from stable_baselines3 import PPO
 
+from flatland_msgs.srv import StepWorld, StepWorldRequest
 from geometry_msgs.msg import Twist
+from rospy.exceptions import ROSException
+from std_msgs.msg import Bool
 
 from rl_agent.utils.observation_collector import ObservationCollector
 
 
 """ TEMPORARY GLOBAL CONSTANTS """
-NS_PREFIX = ""
+NS_PREFIX = "sim_1"
 MODELS_DIR = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"), "agents"
 )
@@ -49,12 +52,19 @@ class DRLAgent:
             ns, LASER_NUM_BEAMS, LASER_MAX_RANGE
         )
 
-        # action agent publisher
+        # for time controlling in train mode
+        self._action_frequency = 1 / rospy.get_param("/robot_action_rate") 
+
         self._is_train_mode = rospy.get_param("/train_mode")
         if self._is_train_mode:
             # w/o action publisher node
             self._action_pub = rospy.Publisher(
                 f"{self._ns}cmd_vel", Twist, queue_size=1
+            )
+            # step world to fast forward simulation time
+            self._service_name_step = f"{self._ns}step_world"
+            self._sim_step_client = rospy.ServiceProxy(
+                self._service_name_step, StepWorld
             )
         else:
             # w/ action publisher node
@@ -113,6 +123,10 @@ class DRLAgent:
 
     def run(self) -> None:
         while not rospy.is_shutdown():
+            if self._is_train_mode:
+                self.call_service_takeSimStep(self._action_frequency)
+            else:
+                self._wait_for_next_action_cycle()
             obs = self.get_observations()
             action = self.get_action(obs)
             self.publish_action(action)
@@ -124,6 +138,21 @@ class DRLAgent:
                 self._discrete_actions[action]["angular"],
             ]
         )
+
+    def _wait_for_next_action_cycle(self) -> None:
+        try:
+            rospy.wait_for_message(f"{self.ns_prefix}next_cycle", Bool)
+        except ROSException:
+            pass
+
+    def call_service_takeSimStep(self, t: float=None) -> None:
+        request = StepWorldRequest() if t is None else StepWorldRequest(t)
+
+        try:
+            response = self._sim_step_client(request)
+            rospy.logdebug("step service=", response)
+        except rospy.ServiceException as e:
+            rospy.logdebug("step Service call failed: %s" % e)
 
 
 if __name__ == "__main__":
