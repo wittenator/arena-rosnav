@@ -15,7 +15,7 @@ from nav_msgs.msg import OccupancyGrid
 from .utils import generate_freespace_indices, get_random_pos_on_map
 
 """SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
-MARL = False
+MARL = rospy.get_param("MARL", default=False)
 
 class RobotManager:
     """
@@ -68,9 +68,14 @@ class RobotManager:
         )
 
         # publisher
-        self._goal_pub = rospy.Publisher(
-            f'{self.ns_prefix}goal', PoseStamped, queue_size=1, latch=True
+        goal_topic = (
+            f'{self.ns_prefix}{self.ROBOT_NAME}/goal' 
+            if MARL 
+            else f'{self.ns_prefix}goal'
         )
+        self._goal_pub = rospy.Publisher(
+            f'{goal_topic}', PoseStamped, queue_size=1, latch=True 
+        ) 
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -206,13 +211,16 @@ class RobotManager:
             if start_pos is None:
                 start_pos_ = Pose2D()
                 start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                )
             else:
                 start_pos_ = start_pos
+
             if goal_pos is None:
                 goal_pos_ = Pose2D()
                 goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
-                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2)
+                    self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
+                )
             else:
                 goal_pos_ = goal_pos
 
@@ -230,7 +238,8 @@ class RobotManager:
         if i_try == max_try_times:
             # TODO Define specific type of Exception
             raise rospy.ServiceException(
-                "can not generate a path with the given start position and the goal position of the robot")
+                "can not generate a path with the given start position and the goal position of the robot"
+            )
         else:
             return start_pos_, goal_pos_
 

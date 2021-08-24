@@ -1,5 +1,4 @@
 #! /usr/bin/env python
-import threading
 from typing import Tuple
 
 from numpy.core.numeric import normalize_axis_tuple
@@ -13,14 +12,10 @@ import threading
 
 # observation msgs
 from sensor_msgs.msg import LaserScan
-from geometry_msgs.msg import Pose2D, PoseStamped, PoseWithCovarianceStamped
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Pose2D, PoseStamped, Twist
 from nav_msgs.msg import Path
 from rosgraph_msgs.msg import Clock
 from nav_msgs.msg import Odometry
-
-# services
-from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 # message filter
 import message_filters
@@ -31,10 +26,8 @@ from tf.transformations import *
 from gym import spaces
 import numpy as np
 
-from std_msgs.msg import Bool
-
-from rl_agent.utils.debug import timeit
-
+"""SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
+MARL = rospy.get_param("MARL", default=False)
 
 class ObservationCollector:
     def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
@@ -70,6 +63,30 @@ class ObservationCollector:
         self._subgoal = Pose2D()
         self._globalplan = np.array([])
 
+        # subscriptions
+        self._scan_sub = rospy.Subscriber(
+            f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True
+        )
+        self._robot_state_sub = rospy.Subscriber(
+            f"{self.ns_prefix}odom", Odometry, self.callback_robot_state, tcp_nodelay=True,
+        )
+
+        # self._clock_sub = rospy.Subscriber(
+        #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
+
+        # when using MARL listen to goal directly since no intermediate planner is considered
+        goal_topic = ( 
+            f"{self.ns_prefix}goal" 
+            if MARL 
+            else f"{self.ns_prefix}subgoal" 
+        ) 
+        self._subgoal_sub = rospy.Subscriber(
+            f"{goal_topic}", PoseStamped, self.callback_subgoal
+        )
+        self._globalplan_sub = rospy.Subscriber(
+            f"{self.ns_prefix}globalPlan", Path, self.callback_global_plan
+        )
+
         # synchronization parameters
         self._first_sync_obs = True  # whether to return first sync'd obs or most recent
         self.max_deque_size = 10
@@ -77,29 +94,6 @@ class ObservationCollector:
 
         self._laser_deque = deque()
         self._rs_deque = deque()
-
-        # subscriptions
-        self._scan_sub = rospy.Subscriber(
-            f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True
-        )
-
-        self._robot_state_sub = rospy.Subscriber(
-            f"{self.ns_prefix}odom",
-            Odometry,
-            self.callback_robot_state,
-            tcp_nodelay=True,
-        )
-
-        # self._clock_sub = rospy.Subscriber(
-        #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
-
-        self._subgoal_sub = rospy.Subscriber(
-            f"{self.ns_prefix}subgoal", PoseStamped, self.callback_subgoal
-        )
-
-        self._globalplan_sub = rospy.Subscriber(
-            f"{self.ns_prefix}globalPlan", Path, self.callback_global_plan
-        )
 
     def get_observation_space(self):
         return self.observation_space
