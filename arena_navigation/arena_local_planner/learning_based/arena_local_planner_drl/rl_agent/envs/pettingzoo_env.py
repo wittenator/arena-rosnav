@@ -1,18 +1,52 @@
 from pettingzoo import *
 from pettingzoo.utils import agent_selector
-from pettingzoo.utils.env import AECIterable, AECIterator
+from pettingzoo.utils import wrappers
+from pettingzoo.utils.env import AECIterable
+
+from task_generator.tasks import *
+
+def env():
+    '''
+    The env function wraps the environment in 3 wrappers by default. These
+    wrappers contain logic that is common to many pettingzoo environments.
+    We recommend you use at least the OrderEnforcingWrapper on your own environment
+    to provide sane error messages. You can find full documentation for these methods
+    elsewhere in the developer documentation.
+    '''
+    env = FlatlandPettingZooEnv()
+    env = wrappers.CaptureStdoutWrapper(env)
+    env = wrappers.AssertOutOfBoundsWrapper(env)
+    env = wrappers.OrderEnforcingWrapper(env)
+    return env
 
 
-class PettingzooEnv(AECEnv):
+class FlatlandPettingZooEnv(AECEnv):
     '''
     The AECEnv steps agents one at a time. If you are unsure if you
     have implemented a AECEnv correctly, try running the `api_test` documented in
     the Developer documentation on the website.
     '''
-    def __init__(self):
-        pass
+    def __init__(self) -> None:
+        '''
+        The init method takes in environment arguments and
+         should define the following attributes:
+        - possible_agents
+        - action_spaces
+        - observation_spaces
 
-    def step(self, action):
+        These attributes should not be changed after initialization.
+        '''
+        self.possible_agents = ["robot_" + str(r) for r in range(2)]
+        self.agent_name_mapping = dict(zip(self.possible_agents, list(range(len(self.possible_agents)))))
+
+        # ROBOT CONFIGS
+        # action space
+
+        # observation space
+
+        # task manager + robot managers
+
+    def step(self, action) -> None:
         '''
         receives a dictionary of actions keyed by the agent name.
         Returns the observation dictionary, reward dictionary, done dictionary, and info dictionary,
@@ -20,26 +54,26 @@ class PettingzooEnv(AECEnv):
         '''
         raise NotImplementedError
 
-    def reset(self):
+    def reset(self) -> None:
         '''
         resets the environment and returns a dictionary of observations (keyed by the agent name)
         '''
         raise NotImplementedError
 
-    def seed(self, seed=None):
+    def seed(self, seed=None) -> None:
         '''
         Reseeds the environment (making the resulting environment deterministic).
         `reset()` must be called after `seed()`, and before `step()`.
         '''
         pass
 
-    def observe(self, agent):
+    def observe(self, agent) -> None:
         '''
         Returns the observation an agent currently can make. `last()` calls this function.
         '''
         raise NotImplementedError
 
-    def render(self, mode='human'):
+    def render(self, mode='human') -> None:
         '''
         Displays a rendered frame from the environment, if supported.
         Alternate render modes in the default environments are `'rgb_array'`
@@ -48,27 +82,19 @@ class PettingzooEnv(AECEnv):
         '''
         raise NotImplementedError
 
-    def state(self):
+    def state(self) -> None:
         '''
         State returns a global view of the environment appropriate for
         centralized training decentralized execution methods like QMIX
         '''
         raise NotImplementedError('state() method has not been implemented in the environment {}.'.format(self.metadata.get('name', self.__class__.__name__)))
 
-    def close(self):
+    def close(self) -> None:
         '''
         Closes the rendering window, subprocesses, network connections, or any other resources
         that should be released.
         '''
         pass
-
-    @property
-    def num_agents(self):
-        return len(self.agents)
-
-    @property
-    def max_num_agents(self):
-        return len(self.possible_agents)
 
     def _dones_step_first(self):
         '''
@@ -80,21 +106,6 @@ class PettingzooEnv(AECEnv):
             self._skip_agent_selection = self.agent_selection
             self.agent_selection = _dones_order[0]
         return self.agent_selection
-
-    def _clear_rewards(self):
-        '''
-        clears all items in .rewards
-        '''
-        for agent in self.rewards:
-            self.rewards[agent] = 0
-
-    def _accumulate_rewards(self):
-        '''
-        adds .rewards dictionary to ._cumulative_rewards dictionary. Typically
-        called near the end of a step() method
-        '''
-        for agent, reward in self.rewards.items():
-            self._cumulative_rewards[agent] += reward
 
     def agent_iter(self, max_iter=2**63):
         '''
@@ -152,18 +163,7 @@ class PettingzooEnv(AECEnv):
             self._skip_agent_selection = None
         self._clear_rewards()
 
-    def __str__(self):
-        '''
-        returns a name which looks like: "space_invaders_v1"
-        '''
-        if hasattr(self, 'metadata'):
-            return self.metadata.get('name', self.__class__.__name__)
-        else:
-            return self.__class__.__name__
 
-    @property
-    def unwrapped(self):
-        return self
 
 
 
