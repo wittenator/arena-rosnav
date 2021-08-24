@@ -21,7 +21,7 @@ from rl_agent.utils.observation_collector import ObservationCollector
 
 
 """ TEMPORARY GLOBAL CONSTANTS """
-NS_PREFIX = "sim_1"
+NS_PREFIX = ""
 MODELS_DIR = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"), "agents"
 )
