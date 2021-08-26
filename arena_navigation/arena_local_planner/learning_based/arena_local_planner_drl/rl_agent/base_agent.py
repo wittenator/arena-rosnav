@@ -4,24 +4,33 @@ from typing import Tuple
 import json
 import numpy as np
 import os
-import pickle
 import rospy
 import rospkg
-import sys
 import yaml
 
 from gym import spaces
-from stable_baselines3 import PPO
 
-from flatland_msgs.srv import StepWorld, StepWorldRequest
 from geometry_msgs.msg import Twist
-from rospy.exceptions import ROSException
-from std_msgs.msg import Bool
 
 from rl_agent.utils.observation_collector import ObservationCollector
 from rl_agent.utils.reward import RewardCalculator
 
 
+ROOT_ROBOT_PATH = os.path.join(
+    rospkg.RosPack().get_path("simulator_setup"), "robot"
+)
+DEFAULT_ACTION_SPACE = os.path.join(
+    rospkg.RosPack().get_path("arena_local_planner_drl"),
+    "configs",
+    "default_settings.yaml",
+)
+DEFAULT_HYPERPARAMETER = os.path.join(
+    rospkg.RosPack().get_path("arena_local_planner_drl"),
+    "configs",
+    "hyperparameters",
+    "default.json",
+)
+DEFAULT_NUM_LASER_BEAMS, DEFAULT_LASER_RANGE = 360, 3.5
 GOAL_RADIUS = 0.33
 
 
@@ -30,22 +39,44 @@ class BaseDRLAgent(ABC):
         self,
         ns: str = None,
         robot_name: str = None,
+        hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
+        action_space_path: str = DEFAULT_ACTION_SPACE,
+        *args,
+        **kwargs,
     ) -> None:
+        """[summary]
+
+        Args:
+            ns (str, optional):
+                Agent name (directory has to be of the same name). Defaults to None.
+            robot_name (str, optional):
+                Robot specific ROS namespace extension. Defaults to None.
+            hyperparameter_path (str, optional):
+                Path to json file containing defined hyperparameters.
+                Defaults to DEFAULT_HYPERPARAMETER.
+            action_space_path (str, optional):
+                Path to yaml file containing action space settings.
+                Defaults to DEFAULT_ACTION_SPACE.
+        """
+        self._is_train_mode = rospy.get_param("/train_mode")
+
         self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
         self._ns_robot = (
             self._ns if robot_name is None else self._ns + robot_name + "/"
         )
 
+        self.load_hyperparameters(path=hyperparameter_path)
         robot_setting_path = os.path.join(
             ROOT_ROBOT_PATH, self.robot_config_name + ".model.yaml"
         )
         self.read_setting_files(robot_setting_path, action_space_path)
         self.setup_action_space()
+        self.setup_reward_calculator()
+
         self.observation_collector = ObservationCollector(
-            ns, self._num_laser_beams, self._laser_range
+            self._ns_robot, self._num_laser_beams, self._laser_range
         )
 
-        self._is_train_mode = rospy.get_param("/train_mode")
         # for time controlling in train mode
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
 
@@ -53,11 +84,6 @@ class BaseDRLAgent(ABC):
             # w/o action publisher node
             self._action_pub = rospy.Publisher(
                 f"{self._ns_robot}cmd_vel", Twist, queue_size=1
-            )
-            # step world to fast forward simulation time
-            self._service_name_step = f"{self._ns}step_world"
-            self._sim_step_client = rospy.ServiceProxy(
-                self._service_name_step, StepWorld
             )
         else:
             # w/ action publisher node
@@ -68,7 +94,28 @@ class BaseDRLAgent(ABC):
 
     @abstractmethod
     def setup_agent(self) -> None:
+        """Sets up the new agent / loads a pretrained one.
+
+        Raises:
+            NotImplementedError: Abstract method.
+        """
         raise NotImplementedError
+
+    def load_hyperparameters(self, path: str) -> None:
+        """Loads the hyperparameters from a json file.
+
+        Args:
+            path (str): Path to the json file.
+        """
+        assert os.path.isfile(
+            path
+        ), f"Hyperparameter file cannot be found at {path}!"
+
+        with open(path, "r") as file:
+            hyperparams = json.load(file)
+
+        self._agent_params = hyperparams
+        self._get_robot_name_from_params()
 
     def read_setting_files(
         self, robot_setting_yaml: str, action_space_yaml: str
@@ -83,8 +130,12 @@ class BaseDRLAgent(ABC):
             action_space_yaml (str): 
                 Yaml file containing the action space configuration. 
         """
+        self._num_laser_beams = None
+        self._laser_range = None
+
         with open(robot_setting_yaml, "r") as fd:
             robot_data = yaml.safe_load(fd)
+
             # get robot radius
             for body in robot_data["bodies"]:
                 if body["name"] == "base_footprint":
@@ -110,6 +161,19 @@ class BaseDRLAgent(ABC):
                         + 1
                     )
                     self._laser_range = plugin["range"]
+
+        if self._num_laser_beams is None:
+            self._num_laser_beams = DEFAULT_NUM_LASER_BEAMS
+            print(
+                f"Wasn't able to read the number of laser beams."
+                "Set to default: {DEFAULT_NUM_LASER_BEAMS}"
+            )
+        if self._laser_range is None:
+            self._laser_range = DEFAULT_LASER_RANGE
+            print(
+                f"Wasn't able to read the laser range."
+                "Set to default: {DEFAULT_LASER_RANGE}"
+            )
 
         with open(action_space_yaml, "r") as fd:
             setting_data = yaml.safe_load(fd)

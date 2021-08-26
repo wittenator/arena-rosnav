@@ -1,47 +1,29 @@
 #!/usr/bin/env python
-from typing import Tuple
-
-import json
-import numpy as np
 import os
 import pickle
 import rospy
 import rospkg
 import sys
-import yaml
 
-from gym import spaces
 from stable_baselines3 import PPO
 
 from flatland_msgs.srv import StepWorld, StepWorldRequest
-from geometry_msgs.msg import Twist
 from rospy.exceptions import ROSException
 from std_msgs.msg import Bool
 
 from rl_agent.base_agent import BaseDRLAgent
-from rl_agent.utils.observation_collector import ObservationCollector
-from rl_agent.utils.reward import RewardCalculator
 
 
 """ TEMPORARY GLOBAL CONSTANTS """
 NS_PREFIX = ""
-MODELS_DIR = os.path.join(
+TRAINED_MODELS_DIR = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"), "agents"
-)
-ROOT_ROBOT_PATH = os.path.join(
-    rospkg.RosPack().get_path("simulator_setup"), "robot"
-)
-DEFAULT_ROBOT_SETTING = os.path.join(
-    ROOT_ROBOT_PATH,
-    "myrobot.model.yaml",
 )
 DEFAULT_ACTION_SPACE = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"),
     "configs",
     "default_settings.yaml",
 )
-LASER_NUM_BEAMS, LASER_MAX_RANGE = 360, 3.5
-GOAL_RADIUS = 0.33
 
 
 class DeploymentDRLAgent(BaseDRLAgent):
@@ -67,56 +49,36 @@ class DeploymentDRLAgent(BaseDRLAgent):
                 Path to yaml file containing action space settings.
                 Defaults to DEFAULT_ACTION_SPACE.
         """
-        self._is_train_mode = rospy.get_param("/train_mode")
+        self.name = agent_name
+        self.setup_agent()
+
+        hyperparameter_path = os.path.join(
+            TRAINED_MODELS_DIR, self.name, "hyperparameters.json"
+        )
+        super().__init__(
+            ns,
+            robot_name,
+            hyperparameter_path,
+            action_space_path,
+        )
 
         if not self._is_train_mode:
             rospy.init_node(f"DRL_local_planner", anonymous=True)
 
-        self.name = agent_name
-        self.setup_agent()
-
-        self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
-        self._ns_robot = (
-            self._ns if robot_name is None else self._ns + robot_name + "/"
-        )
-
-        robot_setting_path = os.path.join(
-            ROOT_ROBOT_PATH, self.robot_config_name + ".model.yaml"
-        )
-        self.read_setting_files(robot_setting_path, action_space_path)
-        self.setup_action_space()
-        self.setup_reward_calculator()
-
-        self.observation_collector = ObservationCollector(
-            ns, self._num_laser_beams, self._laser_range
-        )
-
-        # for time controlling in train mode
-        self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
-
         if self._is_train_mode:
-            # w/o action publisher node
-            self._action_pub = rospy.Publisher(
-                f"{self._ns_robot}cmd_vel", Twist, queue_size=1
-            )
             # step world to fast forward simulation time
             self._service_name_step = f"{self._ns}step_world"
             self._sim_step_client = rospy.ServiceProxy(
                 self._service_name_step, StepWorld
             )
-        else:
-            # w/ action publisher node
-            # (controls action rate being published on '../cmd_vel')
-            self._action_pub = rospy.Publisher(
-                f"{self._ns_robot}cmd_vel_pub", Twist, queue_size=1
-            )
 
     def setup_agent(self) -> None:
         """Loads the trained policy and when required the VecNormalize object."""
-        model_file = os.path.join(MODELS_DIR, self.name, "best_model.zip")
-        vecnorm_file = os.path.join(MODELS_DIR, self.name, "vec_normalize.pkl")
-        model_params_file = os.path.join(
-            MODELS_DIR, self.name, "hyperparameters.json"
+        model_file = os.path.join(
+            TRAINED_MODELS_DIR, self.name, "best_model.zip"
+        )
+        vecnorm_file = os.path.join(
+            TRAINED_MODELS_DIR, self.name, "vec_normalize.pkl"
         )
 
         assert os.path.isfile(
@@ -125,20 +87,12 @@ class DeploymentDRLAgent(BaseDRLAgent):
         assert os.path.isfile(
             vecnorm_file
         ), f"VecNormalize file cannot be found at {vecnorm_file}!"
-        assert os.path.isfile(
-            model_params_file
-        ), f"Hyperparameter file cannot be found at {vecnorm_file}!"
 
         with open(vecnorm_file, "rb") as file_handler:
             vec_normalize = pickle.load(file_handler)
-        with open(model_params_file, "r") as file:
-            hyperparams = json.load(file)
 
         self._agent = PPO.load(model_file).policy
         self._obs_norm_func = vec_normalize.normalize_obs
-        self._agent_params = hyperparams
-
-        self._get_robot_name_from_params()
 
     def run(self) -> None:
         """Loop for running the agent until ROS is shutdown.
@@ -158,18 +112,6 @@ class DeploymentDRLAgent(BaseDRLAgent):
             obs = self.get_observations()[0]
             action = self.get_action(obs)
             self.publish_action(action)
-
-    def _get_disc_action(self, action: int) -> np.ndarray:
-        """Returns defined velocity commands for parsed action index.\
-            (Discrete action space)
-
-        Args:
-            action (int): Index of the desired action.
-
-        Returns:
-            np.ndarray: Velocity commands corresponding to the index.
-        """
-        return super()._get_disc_action(action)
 
     def _wait_for_next_action_cycle(self) -> None:
         """Stops the loop until a trigger message is sent by the ActionPublisher
