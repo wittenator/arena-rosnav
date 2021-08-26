@@ -27,9 +27,11 @@ NS_PREFIX = ""
 MODELS_DIR = os.path.join(
     rospkg.RosPack().get_path("arena_local_planner_drl"), "agents"
 )
+ROOT_ROBOT_PATH = os.path.join(
+    rospkg.RosPack().get_path("simulator_setup"), "robot"
+)
 DEFAULT_ROBOT_SETTING = os.path.join(
-    rospkg.RosPack().get_path("simulator_setup"),
-    "robot",
+    ROOT_ROBOT_PATH,
     "myrobot.model.yaml",
 )
 DEFAULT_ACTION_SPACE = os.path.join(
@@ -41,20 +43,28 @@ LASER_NUM_BEAMS, LASER_MAX_RANGE = 360, 3.5
 GOAL_RADIUS = 0.33
 
 
-class DRLAgent:
+class DeploymentDRLAgent:
     def __init__(
         self,
         agent_name: str,
-        robot_name: str = None,
         ns: str = None,
-        robot_setting_path: str = DEFAULT_ROBOT_SETTING,
+        robot_name: str = None,
         action_space_path: str = DEFAULT_ACTION_SPACE,
+        *args,
+        **kwargs,
     ) -> None:
         """Initialization procedure for the DRL agent node.
 
         Args:
-            name (str): Agent name (directory has to be of the same name)
-            ns (str): Agent-specific ROS namespace
+            agent_name (str):
+                Agent name (directory has to be of the same name)
+            robot_name (str, optional):
+                Robot specific ROS namespace extension. Defaults to None.
+            ns (str, optional):
+                Simulation specific ROS namespace. Defaults to None.
+            action_space_path (str, optional):
+                Path to yaml file containing action space settings.
+                Defaults to DEFAULT_ACTION_SPACE.
         """
         self._is_train_mode = rospy.get_param("/train_mode")
 
@@ -62,14 +72,16 @@ class DRLAgent:
             rospy.init_node(f"DRL_local_planner", anonymous=True)
 
         self.name = agent_name
-        self.robot_name = robot_name
+        self.setup_agent()
 
         self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
         self._ns_robot = (
             self._ns if robot_name is None else self._ns + robot_name + "/"
         )
 
-        self.setup_agent()
+        robot_setting_path = os.path.join(
+            ROOT_ROBOT_PATH, self.robot_config_name + ".model.yaml"
+        )
         self.read_setting_files(robot_setting_path, action_space_path)
         self.setup_action_space()
         self.setup_reward_calculator()
@@ -99,7 +111,7 @@ class DRLAgent:
             )
 
     def setup_agent(self) -> None:
-        """Loads the trained policy and when required the VecNormalize object"""
+        """Loads the trained policy and when required the VecNormalize object."""
         model_file = os.path.join(MODELS_DIR, self.name, "best_model.zip")
         vecnorm_file = os.path.join(MODELS_DIR, self.name, "vec_normalize.pkl")
         model_params_file = os.path.join(
@@ -124,6 +136,15 @@ class DRLAgent:
         self._agent = PPO.load(model_file).policy
         self._obs_norm_func = vec_normalize.normalize_obs
         self._agent_params = hyperparams
+
+        self._get_robot_name_from_params()
+
+    def _get_robot_name_from_params(self):
+        """Retrives the agent-specific robot name from the dictionary loaded\
+            from respective 'hyperparameter.json'.    
+        """
+        assert self._agent_params and self._agent_params["robot"]
+        self.robot_config_name = self._agent_params["robot"]
 
     def read_setting_files(
         self, robot_setting_yaml: str, action_space_yaml: str
@@ -180,7 +201,7 @@ class DRLAgent:
             }
 
     def setup_action_space(self) -> None:
-        """Sets up the action space (spaces.Box)"""
+        """Sets up the action space. (spaces.Box)"""
         assert self._discrete_actions or self._cont_actions
         assert (
             self._agent_params and "discrete_action_space" in self._agent_params
@@ -207,7 +228,7 @@ class DRLAgent:
         )
 
     def setup_reward_calculator(self) -> None:
-        """Sets up the reward calculator"""
+        """Sets up the reward calculator."""
         assert self._agent_params and "reward_fnc" in self._agent_params
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius,
@@ -219,7 +240,7 @@ class DRLAgent:
 
     @property
     def action_space(self) -> spaces.Box:
-        """Returns the DRL agent's action space
+        """Returns the DRL agent's action space.
 
         Returns:
             spaces.Box: Agent's action space
@@ -228,27 +249,12 @@ class DRLAgent:
 
     @property
     def observation_space(self) -> spaces.Box:
-        """Returns the DRL agent's observation space
+        """Returns the DRL agent's observation space.
 
         Returns:
             spaces.Box: Agent's observation space
         """
         return self.observation_collector.observation_space
-
-    def get_reward(self, action: np.ndarray, obs_dict: dict) -> float:
-        """Calculates the reward based on the parsed observation
-
-        Args:
-            action (np.ndarray):
-                Velocity commands of the agent.
-            obs_dict (dict):
-                Observation dictionary where each key makes up a different \
-                kind of information about the environment.
-
-        Returns:
-            float: Reward amount
-        """
-        return self.reward_calculator.get_reward(action=action, **obs_dict)
 
     def get_observations(self) -> Tuple[np.ndarray, dict]:
         """Retrieves the latest synchronized observation.
@@ -258,7 +264,7 @@ class DRLAgent:
                 Tuple, where first entry depicts the observation data concatenated \
                 into one array. Second entry represents the observation dictionary.
         """
-        merged_obs, obs_dict = self.observation_collector.get_observations()[0]
+        merged_obs, obs_dict = self.observation_collector.get_observations()
         if self._agent_params["normalize"]:
             merged_obs = self._obs_norm_func(merged_obs)
         return merged_obs, obs_dict
@@ -285,7 +291,7 @@ class DRLAgent:
         return action
 
     def publish_action(self, action: np.ndarray) -> None:
-        """Publishes an action on 'self._action_pub' (ROS topic)
+        """Publishes an action on 'self._action_pub' (ROS topic).
 
         Args:
             action (np.ndarray):
@@ -340,7 +346,7 @@ class DRLAgent:
             That node is only booted when training mode is off.
         """
         try:
-            rospy.wait_for_message(f"{self.ns_prefix}next_cycle", Bool)
+            rospy.wait_for_message(f"{self._ns_robot}next_cycle", Bool)
         except ROSException:
             pass
 
@@ -362,7 +368,7 @@ class DRLAgent:
 
 
 def main(agent_name: str) -> None:
-    AGENT = DRLAgent(agent_name, NS_PREFIX)
+    AGENT = DeploymentDRLAgent(agent_name=agent_name, ns=NS_PREFIX)
 
     try:
         AGENT.run()
