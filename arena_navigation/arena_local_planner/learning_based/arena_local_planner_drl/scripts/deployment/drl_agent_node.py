@@ -207,6 +207,7 @@ class DRLAgent:
         )
 
     def setup_reward_calculator(self) -> None:
+        """Sets up the reward calculator"""
         assert self._agent_params and "reward_fnc" in self._agent_params
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius,
@@ -218,22 +219,60 @@ class DRLAgent:
 
     @property
     def action_space(self) -> spaces.Box:
+        """Returns the DRL agent's action space
+
+        Returns:
+            spaces.Box: Agent's action space
+        """
         return self._action_space
 
     @property
     def observation_space(self) -> spaces.Box:
+        """Returns the DRL agent's observation space
+
+        Returns:
+            spaces.Box: Agent's observation space
+        """
         return self.observation_collector.observation_space
 
     def get_reward(self, action: np.ndarray, obs_dict: dict) -> float:
+        """Calculates the reward based on the parsed observation
+
+        Args:
+            action (np.ndarray):
+                Velocity commands of the agent.
+            obs_dict (dict):
+                Observation dictionary where each key makes up a different \
+                kind of information about the environment.
+
+        Returns:
+            float: Reward amount
+        """
         return self.reward_calculator.get_reward(action=action, **obs_dict)
 
     def get_observations(self) -> Tuple[np.ndarray, dict]:
+        """Retrieves the latest synchronized observation.
+
+        Returns:
+            Tuple[np.ndarray, dict]: 
+                Tuple, where first entry depicts the observation data concatenated \
+                into one array. Second entry represents the observation dictionary.
+        """
         merged_obs, obs_dict = self.observation_collector.get_observations()[0]
         if self._agent_params["normalize"]:
             merged_obs = self._obs_norm_func(merged_obs)
         return merged_obs, obs_dict
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
+        """Infers an action based on the given observation.
+
+        Args:
+            obs (np.ndarray): Merged observation array.
+
+        Returns:
+            np.ndarray:
+                Action in [linear velocity, angular velocity]
+        """
         action = self._agent.predict(obs, deterministic=True)[0]
         if self._agent_params["discrete_action_space"]:
             action = self._get_disc_action(action)
@@ -246,12 +285,27 @@ class DRLAgent:
         return action
 
     def publish_action(self, action: np.ndarray) -> None:
+        """Publishes an action on 'self._action_pub' (ROS topic)
+
+        Args:
+            action (np.ndarray):
+                Action in [linear velocity, angular velocity]
+        """
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.angular.z = action[1]
         self._action_pub.publish(action_msg)
 
     def run(self) -> None:
+        """Loop for running the agent until ROS is shutdown.
+        
+        Note:
+            Calls the 'step_world'-service for fast-forwarding the \
+            simulation time in training mode. The simulation is forwarded \
+            by action_frequency seconds. Otherwise, communicates with \
+            the ActionPublisher node in order to comply with the specified \
+            action publishing rate.
+        """
         while not rospy.is_shutdown():
             if self._is_train_mode:
                 self.call_service_takeSimStep(self._action_frequency)
@@ -261,7 +315,16 @@ class DRLAgent:
             action = self.get_action(obs)
             self.publish_action(action)
 
-    def _get_disc_action(self, action: int):
+    def _get_disc_action(self, action: int) -> np.ndarray:
+        """Returns defined velocity commands for parsed action index.\
+            (Discrete action space)
+
+        Args:
+            action (int): Index of the desired action.
+
+        Returns:
+            np.ndarray: Velocity commands corresponding to the index.
+        """
         return np.array(
             [
                 self._discrete_actions[action]["linear"],
@@ -270,12 +333,25 @@ class DRLAgent:
         )
 
     def _wait_for_next_action_cycle(self) -> None:
+        """Stops the loop until a trigger message is sent by the ActionPublisher
+
+        Note:
+            Only use this method in combination with the ActionPublisher node!
+            That node is only booted when training mode is off.
+        """
         try:
             rospy.wait_for_message(f"{self.ns_prefix}next_cycle", Bool)
         except ROSException:
             pass
 
     def call_service_takeSimStep(self, t: float = None) -> None:
+        """Fast-forwards the simulation time.
+
+        Args:
+            t (float, optional):
+                Time in seconds. When t is None, time is forwarded by 'step_size' s.
+                Defaults to None.
+        """
         request = StepWorldRequest() if t is None else StepWorldRequest(t)
 
         try:
