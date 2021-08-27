@@ -11,7 +11,7 @@ from flatland_msgs.srv import StepWorld, StepWorldRequest
 from rospy.exceptions import ROSException
 from std_msgs.msg import Bool
 
-from rl_agent.base_agent import BaseDRLAgent
+from rl_agent.base_agent_wrapper import BaseDRLAgent
 
 
 """ TEMPORARY GLOBAL CONSTANTS """

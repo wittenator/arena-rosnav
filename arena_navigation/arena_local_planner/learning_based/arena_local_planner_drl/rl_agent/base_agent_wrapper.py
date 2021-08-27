@@ -109,7 +109,7 @@ class BaseDRLAgent(ABC):
         """
         assert os.path.isfile(
             path
-        ), f"Hyperparameter file cannot be found at {path}!"
+        ), f"Hyperparameters file cannot be found at {path}!"
 
         with open(path, "r") as file:
             hyperparams = json.load(file)
@@ -274,6 +274,7 @@ class BaseDRLAgent(ABC):
             np.ndarray:
                 Action in [linear velocity, angular velocity]
         """
+        assert self._agent, "Agent model not initialized!"
         action = self._agent.predict(obs, deterministic=True)[0]
         if self._agent_params["discrete_action_space"]:
             action = self._get_disc_action(action)
