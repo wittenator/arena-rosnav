@@ -2,7 +2,6 @@ import os
 import rospkg
 
 from rl_agent.base_agent_wrapper import BaseDRLAgent
-from rospy.core import deprecated
 
 
 DEFAULT_ACTION_SPACE = os.path.join(

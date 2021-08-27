@@ -60,9 +60,9 @@ class BaseDRLAgent(ABC):
         """
         self._is_train_mode = rospy.get_param("/train_mode")
 
-        self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
+        self._ns = "" if ns is None or ns == "" else ns + "/"
         self._ns_robot = (
-            self._ns if robot_name is None else self._ns + robot_name + "/"
+            self._ns if robot_name is None else self._ns + robot_name
         )
 
         self.load_hyperparameters(path=hyperparameter_path)
@@ -260,9 +260,28 @@ class BaseDRLAgent(ABC):
                 into one array. Second entry represents the observation dictionary.
         """
         merged_obs, obs_dict = self.observation_collector.get_observations()
-        if self._agent_params["normalize"]:
-            merged_obs = self._obs_norm_func(merged_obs)
+        if not self._is_train_mode and self._agent_params["normalize"]:
+            self.normalize_observations(merged_obs)
         return merged_obs, obs_dict
+
+    def normalize_observations(self, merged_obs: np.ndarray) -> np.ndarray:
+        """Normalizes the observations with the loaded VecNormalize object.
+
+        Note:
+            VecNormalize object from Stable-Baselines3 is agent specific\
+            and integral part in order to map right actions.\
+
+        Args:
+            merged_obs (np.ndarray):
+                observation data concatenated into one array.
+
+        Returns:
+            np.ndarray: Normalized observations array.
+        """
+        assert self._agent_params["normalize"] and hasattr(
+            self, "_obs_norm_func"
+        )
+        return self._obs_norm_func(merged_obs)
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         """Infers an action based on the given observation.
