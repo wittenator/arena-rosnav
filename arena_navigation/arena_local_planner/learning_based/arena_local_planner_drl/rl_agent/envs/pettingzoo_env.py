@@ -43,14 +43,22 @@ class FlatlandPettingZooEnv(ParallelEnv):
         task_mode: str = "random",
         max_num_moves_per_eps: int = 1000,
     ) -> None:
-        """
-        The init method takes in environment arguments and
-         should define the following attributes:
-        - possible_agents
-        - action_spaces
-        - observation_spaces
+        """[summary]
 
-        These attributes should not be changed after initialization.
+        Description:
+            The init method takes in environment arguments and
+            should define the following attributes:
+            - possible_agents
+            - action_spaces
+            - observation_spaces
+
+            These attributes should not be changed after initialization.
+
+        Args:
+            ns (str, optional): [description]. Defaults to None.
+            agent_list (List[TrainingDRLAgent], optional): [description]. Defaults to [].
+            task_mode (str, optional): [description]. Defaults to "random".
+            max_num_moves_per_eps (int, optional): [description]. Defaults to 1000.
         """
         self._ns = "" if ns is None or ns == "" else ns + "/"
         self._is_train_mode = rospy.get_param("/train_mode")
@@ -61,6 +69,8 @@ class FlatlandPettingZooEnv(ParallelEnv):
             zip(self.possible_agents, list(range(len(self.possible_agents))))
         )
         self.agent_object_mapping = dict(zip(self.possible_agents, agent_list))
+        self._robot_sim_ns = [a._robot_sim_ns for a in agent_list]
+
         self._validate_agent_list()
 
         # action space
@@ -74,8 +84,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
             agent: agent_list[i].observation_space
             for i, agent in enumerate(self.possible_agents)
         }
-
-        self._robot_sim_ns = [a._robot_sim_ns for a in agent_list]
 
         # task manager
         self.task_manager = get_MARL_task(
@@ -98,8 +106,10 @@ class FlatlandPettingZooEnv(ParallelEnv):
         assert len(self.possible_agents) == len(set(self.possible_agents))
 
     def reset(self) -> Dict[str, np.ndarray]:
-        """
-        resets the environment and returns a dictionary of observations (keyed by the agent name)
+        """Resets the environment and returns a dictionary of observations (keyed by the agent name)
+
+        Returns:
+            Dict[str, np.ndarray]: [description]
         """
         self.agents = self.possible_agents[:]
         self.num_moves = 0
