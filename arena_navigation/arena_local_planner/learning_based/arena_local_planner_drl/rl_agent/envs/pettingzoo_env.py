@@ -1,4 +1,4 @@
-from typing import List, Tuple, Dict
+from typing import List, Tuple, Dict, Any, Union
 
 import numpy as np
 import rospy
@@ -41,6 +41,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         ns: str = None,
         agent_list: List[TrainingDRLAgent] = [],
         task_mode: str = "random",
+        max_num_moves_per_eps: int = 1000,
     ) -> None:
         """
         The init method takes in environment arguments and
@@ -54,6 +55,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         self._ns = "" if ns is None or ns == "" else ns + "/"
         self._is_train_mode = rospy.get_param("/train_mode")
 
+        self.agents = []
         self.possible_agents = [a._robot_sim_ns for a in agent_list]
         self.agent_name_mapping = dict(
             zip(self.possible_agents, list(range(len(self.possible_agents))))
@@ -89,6 +91,8 @@ class FlatlandPettingZooEnv(ParallelEnv):
                 self._service_name_step, StepWorld
             )
 
+        self._max_num_moves = max_num_moves_per_eps
+
     def _validate_agent_list(self) -> None:
         # check if all agents named differently (target different namespaces)
         assert len(self.possible_agents) == len(set(self.possible_agents))
@@ -122,12 +126,21 @@ class FlatlandPettingZooEnv(ParallelEnv):
         Dict[str, np.ndarray],
         Dict[str, float],
         Dict[str, bool],
-        Dict[str, dict],
+        Dict[str, Dict[str, Any]],
     ]:
-        """
-        receives a dictionary of actions keyed by the agent name.
-        Returns the observation dictionary, reward dictionary, done dictionary,
-        and info dictionary, where each dictionary is keyed by the agent.
+        """[summary]
+
+        Description:
+            Receives a dictionary of actions keyed by the agent name.
+            Returns the observation dictionary, reward dictionary, done dictionary,
+            and info dictionary, where each dictionary is keyed by the agent.
+
+        Args:
+            actions (Dict[str, np.ndarray]): [description]
+
+        Returns:
+            Tuple[ Dict[str, np.ndarray], Dict[str, float], Dict[str, bool], Dict[str, Dict[str, Any]], ]:
+                [description]
         """
         # If a user passes in actions with no agents, then just return empty observations, etc.
         if not actions:
@@ -140,64 +153,40 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         # fast-forward simulation
         self.call_service_takeSimStep()
+        self.num_moves += 1
 
-        # observations
-        observations: Dict[
-            str, Tuple[np.ndarray, dict]
-        ] = {  # [0] - merged obs, [1] - obs dict
-            agent: self.agent_object_mapping[agent].get_observations()
-            for agent in self.agents
-        }
+        merged_obs, rewards, reward_infos = {}, {}, {}
 
-        mergeds_obs: Dict[str, np.ndarray] = {
-            agent: observations[agent][0] for agent in self.agents
-        }
+        for agent in self.agents:
+            # observations
+            merged, _dict = self.agent_object_mapping[agent].get_observations()
+            merged_obs[agent] = merged
 
-        # rewards and infos
-        rewards_and_info: Dict[str, float] = {
-            agent: self.agent_object_mapping[agent].get_reward(
-                action=actions[agent], obs_dict=observations[agent][1]
+            # rewards and infos
+            reward, reward_info = self.agent_object_mapping[agent].get_reward(
+                action=actions[agent], obs_dict=_dict
             )
-            for agent in self.agents
-        }
+            rewards[agent], reward_infos[agent] = reward, reward_info
 
-        rewards, infos = {}, {}
-        for agent, reward_and_info in rewards_and_info.items():
-            rewards[agent] = reward_and_info[0]
-            infos[agent] = reward_and_info[1]
-
-        # dones
-        # TODO: when do we consider the episode as done?
-        dones = {}
-
-        return mergeds_obs, rewards, dones, infos
-
-    def render(self, mode="human"):
-        """
-        Displays a rendered frame from the environment, if supported.
-        Alternate render modes in the default environments are `'rgb_array'`
-        which returns a numpy array and is supported by all environments outside
-        of classic, and `'ansi'` which returns the strings printed
-        (specific to classic environments).
-        """
-        raise NotImplementedError
-
-    def state(self):
-        """
-        State returns a global view of the environment appropriate for
-        centralized training decentralized execution methods like QMIX
-        """
-        raise NotImplementedError(
-            "state() method has not been implemented in the environment {}.".format(
-                self.metadata.get("name", self.__class__.__name__)
-            )
+        # dones & infos
+        dones, infos = self._get_dones(reward_infos), self._get_infos(
+            reward_infos
         )
+
+        return merged_obs, rewards, dones, infos
 
     @property
     def max_num_agents(self):
         return len(self.agents)
 
     def call_service_takeSimStep(self, t: float = None):
+        """Fast-forwards the simulation time.
+
+        Args:
+            t (float, optional):
+                Time in seconds. When t is None, time is forwarded by 'step_size' s.
+                Defaults to None.
+        """
         request = StepWorldRequest() if t is None else StepWorldRequest(t)
 
         try:
@@ -205,3 +194,45 @@ class FlatlandPettingZooEnv(ParallelEnv):
             rospy.logdebug("step service=", response)
         except rospy.ServiceException as e:
             rospy.logdebug("step Service call failed: %s" % e)
+
+    def _get_dones(
+        self, reward_infos: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, bool]:
+        """[summary]
+
+        Args:
+            reward_infos (Dict[str, Dict[str, Any]]): [description]
+
+        Returns:
+            Dict[str, bool]: [description]
+        """
+        return (
+            {agent: reward_infos[agent]["is_done"] for agent in self.agents}
+            if self.num_moves < self._max_num_moves
+            else {agent: True for agent in self.agents}
+        )
+
+    def _get_infos(
+        self, reward_infos: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
+        """[summary]
+
+        Args:
+            reward_infos (Dict[str, Dict[str, Any]]): [description]
+
+        Returns:
+            Dict[str, Dict[str, Any]]: [description]
+        """
+        infos = {}
+        for agent in self.agents:
+            if reward_infos[agent]["is_done"]:
+                infos[agent] = {
+                    "done_reason": reward_infos[agent]["done_reason"],
+                    "is_success": reward_infos[agent]["is_success"],
+                }
+            elif self.num_moves >= self._max_num_moves:
+                infos[agent] = {
+                    "done_reason": 0,
+                    "is_success": 0,
+                }
+        return infos
