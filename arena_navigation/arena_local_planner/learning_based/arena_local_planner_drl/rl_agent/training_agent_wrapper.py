@@ -1,7 +1,12 @@
+from typing import Tuple
+
+import numpy as np
 import os
 import rospkg
 
 from rl_agent.base_agent_wrapper import BaseDRLAgent
+
+from geometry_msgs.msg import Twist
 
 
 DEFAULT_ACTION_SPACE = os.path.join(
@@ -66,3 +71,28 @@ class TrainingDRLAgent(BaseDRLAgent):
 
     def setup_agent(self) -> None:
         pass
+
+    def get_observations(self) -> Tuple[np.ndarray, dict]:
+        """Retrieves the latest synchronized observation.
+
+        Returns:
+            Tuple[np.ndarray, dict]: 
+                Tuple, where first entry depicts the observation data concatenated \
+                into one array. Second entry represents the observation dictionary.
+        """
+        return self.observation_collector.get_observations()
+
+    def publish_action(self, action: np.ndarray) -> None:
+        """Publishes an action on 'self._action_pub' (ROS topic).
+
+        Args:
+            action (np.ndarray):
+                Action in [linear velocity, angular velocity]
+        """
+        if self._agent_params["discrete_action_space"]:
+            action = self._get_disc_action(action)
+
+        action_msg = Twist()
+        action_msg.linear.x = action[0]
+        action_msg.angular.z = action[1]
+        self._action_pub.publish(action_msg)

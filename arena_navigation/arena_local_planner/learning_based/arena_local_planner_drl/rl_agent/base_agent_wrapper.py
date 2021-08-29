@@ -263,7 +263,7 @@ class BaseDRLAgent(ABC):
                 into one array. Second entry represents the observation dictionary.
         """
         merged_obs, obs_dict = self.observation_collector.get_observations()
-        if not self._is_train_mode and self._agent_params["normalize"]:
+        if self._agent_params["normalize"]:
             self.normalize_observations(merged_obs)
         return merged_obs, obs_dict
 
