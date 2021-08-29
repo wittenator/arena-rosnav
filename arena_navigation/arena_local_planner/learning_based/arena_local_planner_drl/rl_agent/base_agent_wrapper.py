@@ -64,7 +64,7 @@ class BaseDRLAgent(ABC):
         self._ns_robot = (
             self._ns if robot_name is None else self._ns + robot_name
         )
-        self._robot_simulation_name = robot_name
+        self._robot_sim_ns = robot_name
 
         self.load_hyperparameters(path=hyperparameter_path)
         robot_setting_path = os.path.join(
@@ -166,14 +166,14 @@ class BaseDRLAgent(ABC):
         if self._num_laser_beams is None:
             self._num_laser_beams = DEFAULT_NUM_LASER_BEAMS
             print(
-                f"{self._robot_simulation_name}:"
+                f"{self._robot_sim_ns}:"
                 "Wasn't able to read the number of laser beams."
                 "Set to default: {DEFAULT_NUM_LASER_BEAMS}"
             )
         if self._laser_range is None:
             self._laser_range = DEFAULT_LASER_RANGE
             print(
-                f"{self._robot_simulation_name}:"
+                f"{self._robot_sim_ns}:"
                 "Wasn't able to read the laser range."
                 "Set to default: {DEFAULT_LASER_RANGE}"
             )
@@ -310,7 +310,7 @@ class BaseDRLAgent(ABC):
 
     def get_reward(self, action: np.ndarray, obs_dict: dict) -> float:
         """Calculates the reward based on the parsed observation
-        
+
         Args:
             action (np.ndarray):
                 Velocity commands of the agent\
