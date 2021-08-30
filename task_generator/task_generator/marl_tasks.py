@@ -281,7 +281,7 @@ def get_MARL_task(
         raise NotImplementedError
     if task_mode == ARENA_TASKS.RANDOM:
         rospy.set_param("/task_mode", "random")
-        obstacles_manager.register_random_obstacles(20, 0.4)
+        obstacles_manager.register_random_obstacles(10, 1.0)
         task = RandomMARLTask(obstacles_manager, robot_manager)
     if task_mode == ARENA_TASKS.STAGED:
         rospy.set_param("/task_mode", "staged")

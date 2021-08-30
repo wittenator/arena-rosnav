@@ -2,10 +2,8 @@ from typing import List, Tuple, Dict, Any, Union
 
 import numpy as np
 import rospy
-import rospkg
 
 from pettingzoo import *
-from pettingzoo.utils import agent_selector
 from pettingzoo.utils import wrappers
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
@@ -87,7 +85,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         # task manager
         self.task_manager = get_MARL_task(
-            ns=self._ns,
+            ns=ns,
             mode=task_mode,
             robot_names=self._robot_sim_ns,
         )
@@ -233,7 +231,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         Returns:
             Dict[str, Dict[str, Any]]: [description]
         """
-        infos = {}
+        infos = {agent: {} for agent in self.agents}
         for agent in self.agents:
             if reward_infos[agent]["is_done"]:
                 infos[agent] = {

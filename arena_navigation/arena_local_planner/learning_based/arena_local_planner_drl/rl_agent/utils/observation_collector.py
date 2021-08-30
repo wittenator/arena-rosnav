@@ -29,8 +29,14 @@ import numpy as np
 """SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
 MARL = rospy.get_param("MARL", default=False)
 
+
 class ObservationCollector:
-    def __init__(self, ns: str, num_lidar_beams: int, lidar_range: float):
+    def __init__(
+        self,
+        ns: str,
+        num_lidar_beams: int,
+        lidar_range: float,
+    ):
         """a class to collect and merge observations
 
         Args:
@@ -41,16 +47,23 @@ class ObservationCollector:
         if ns is None or ns == "":
             self.ns_prefix = ""
         else:
-            self.ns_prefix = "/" + ns + "/"
+            self.ns_prefix = (
+                "/" + ns + "/" if not ns.endswith("/") else "/" + ns
+            )
 
         # define observation_space
         self.observation_space = ObservationCollector._stack_spaces(
             (
                 spaces.Box(
-                    low=0, high=lidar_range, shape=(num_lidar_beams,), dtype=np.float32
+                    low=0,
+                    high=lidar_range,
+                    shape=(num_lidar_beams,),
+                    dtype=np.float32,
                 ),
                 spaces.Box(low=0, high=10, shape=(1,), dtype=np.float32),
-                spaces.Box(low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32),
+                spaces.Box(
+                    low=-np.pi, high=np.pi, shape=(1,), dtype=np.float32
+                ),
             )
         )
 
@@ -65,21 +78,25 @@ class ObservationCollector:
 
         # subscriptions
         self._scan_sub = rospy.Subscriber(
-            f"{self.ns_prefix}scan", LaserScan, self.callback_scan, tcp_nodelay=True
+            f"{self.ns_prefix}scan",
+            LaserScan,
+            self.callback_scan,
+            tcp_nodelay=True,
         )
         self._robot_state_sub = rospy.Subscriber(
-            f"{self.ns_prefix}odom", Odometry, self.callback_robot_state, tcp_nodelay=True,
+            f"{self.ns_prefix}odom",
+            Odometry,
+            self.callback_robot_state,
+            tcp_nodelay=True,
         )
 
         # self._clock_sub = rospy.Subscriber(
         #     f'{self.ns_prefix}clock', Clock, self.callback_clock, tcp_nodelay=True)
 
         # when using MARL listen to goal directly since no intermediate planner is considered
-        goal_topic = ( 
-            f"{self.ns_prefix}goal" 
-            if MARL 
-            else f"{self.ns_prefix}subgoal" 
-        ) 
+        goal_topic = (
+            f"{self.ns_prefix}goal" if MARL else f"{self.ns_prefix}subgoal"
+        )
         self._subgoal_sub = rospy.Subscriber(
             f"{goal_topic}", PoseStamped, self.callback_subgoal
         )
@@ -88,7 +105,9 @@ class ObservationCollector:
         )
 
         # synchronization parameters
-        self._first_sync_obs = True  # whether to return first sync'd obs or most recent
+        self._first_sync_obs = (
+            True  # whether to return first sync'd obs or most recent
+        )
         self.max_deque_size = 10
         self._sync_slop = 0.1
 
@@ -134,9 +153,9 @@ class ObservationCollector:
         y_relative = goal_pos.y - robot_pos.y
         x_relative = goal_pos.x - robot_pos.x
         rho = (x_relative ** 2 + y_relative ** 2) ** 0.5
-        theta = (np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi) % (
-            2 * np.pi
-        ) - np.pi
+        theta = (
+            np.arctan2(y_relative, x_relative) - robot_pos.theta + 4 * np.pi
+        ) % (2 * np.pi) - np.pi
         return rho, theta
 
     def get_sync_obs(self):
@@ -181,7 +200,9 @@ class ObservationCollector:
         return
 
     def callback_global_plan(self, msg_global_plan):
-        self._globalplan = ObservationCollector.process_global_plan_msg(msg_global_plan)
+        self._globalplan = ObservationCollector.process_global_plan_msg(
+            msg_global_plan
+        )
         return
 
     def callback_scan(self, msg_laserscan):
@@ -194,7 +215,9 @@ class ObservationCollector:
             self._rs_deque.popleft()
         self._rs_deque.append(msg_robotstate)
 
-    def callback_observation_received(self, msg_LaserScan, msg_RobotStateStamped):
+    def callback_observation_received(
+        self, msg_LaserScan, msg_RobotStateStamped
+    ):
         # process sensor msg
         self._scan = self.process_scan_msg(msg_LaserScan)
         self._robot_pose, self._robot_vel = self.process_robot_state_msg(
