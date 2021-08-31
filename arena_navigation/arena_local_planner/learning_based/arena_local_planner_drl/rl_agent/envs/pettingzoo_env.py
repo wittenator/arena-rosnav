@@ -101,7 +101,9 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
     def _validate_agent_list(self) -> None:
         # check if all agents named differently (target different namespaces)
-        assert len(self.possible_agents) == len(set(self.possible_agents))
+        assert len(self.possible_agents) == len(
+            set(self.possible_agents)
+        ), "Robot names and thus there namespaces, have to be unique!"
 
     def reset(self) -> Dict[str, np.ndarray]:
         """Resets the environment and returns a dictionary of observations (keyed by the agent name)

@@ -3,6 +3,8 @@ import rospy
 import rospkg
 import os
 
+rospy.set_param("/MARL", True)
+
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from scripts.deployment.drl_agent_node import DeploymentDRLAgent
 from rl_agent.envs.pettingzoo_env import FlatlandPettingZooEnv
@@ -31,7 +33,18 @@ def main():
         robot_name="test2",
         hyperparameter_path=DEFAULT_HYPERPARAMETER,
     )
-    agent_list = [agent1, agent2]
+    agent3 = TrainingDRLAgent(
+        ns="sim_1",
+        robot_name="test3",
+        hyperparameter_path=DEFAULT_HYPERPARAMETER,
+    )
+    agent4 = TrainingDRLAgent(
+        ns="sim_1",
+        robot_name="test4",
+        hyperparameter_path=DEFAULT_HYPERPARAMETER,
+    )
+
+    agent_list = [agent1, agent2, agent3, agent4]
 
     env = FlatlandPettingZooEnv(ns="sim_1", agent_list=agent_list)
     obs = env.reset()
@@ -43,7 +56,7 @@ def main():
     agent_names = env.agents
     for _ in range(100000000):
         actions = {agent: AGENT.get_action(obs[agent]) for agent in agent_names}
-        env.step(actions)
+        obs, rewards, dones, infos = env.step(actions)
 
 
 if __name__ == "__main__":
