@@ -10,7 +10,7 @@ url = "https://rospypi.github.io/simple/"
 secondary = true
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8,<3.10"
 rospy = "^1.15.7"
 rosbag = "^1.15.7"
 tf = "^1.12.1"
@@ -24,6 +24,7 @@ empy = "^3.3.4"
 setuptools = "^56.2.0"
 filelock = "^3.0.12"
 PyQt5 = "^5.15.4"
+SuperSuit = "^3.1.0"
 
 [tool.poetry.dev-dependencies]
 
