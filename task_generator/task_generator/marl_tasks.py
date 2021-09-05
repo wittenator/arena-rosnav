@@ -23,7 +23,9 @@ class ABSMARLTask(ABC):
     """An abstract class for the DRL agent navigation tasks."""
 
     def __init__(
-        self, obstacles_manager: ObstaclesManager, robot_manager: List[RobotManager]
+        self,
+        obstacles_manager: ObstaclesManager,
+        robot_manager: List[RobotManager],
     ):
         self.obstacles_manager = obstacles_manager
         self.robot_manager = robot_manager
@@ -49,7 +51,9 @@ class RandomMARLTask(ABSMARLTask):
     """Sets a randomly drawn start and goal position for each robot episodically."""
 
     def __init__(
-        self, obstacles_manager: ObstaclesManager, robot_manager: List[RobotManager]
+        self,
+        obstacles_manager: ObstaclesManager,
+        robot_manager: List[RobotManager],
     ):
         super().__init__(obstacles_manager, robot_manager)
         self._num_robots = len(self.robot_manager)
@@ -61,11 +65,21 @@ class RandomMARLTask(ABSMARLTask):
             fail_times = 0
             while fail_times < max_fail_times:
                 try:
-                    starts, goals = [None] * self._num_robots, [None] * self._num_robots
+                    starts, goals = [None] * self._num_robots, [
+                        None
+                    ] * self._num_robots
                     for i, manager in enumerate(self.robot_manager):
                         start_pos, goal_pos = manager.set_start_pos_goal_pos()
-                        starts[i] = (start_pos.x, start_pos.y, manager.ROBOT_RADIUS)
-                        goals[i] = (goal_pos.x, goal_pos.y, manager.ROBOT_RADIUS)
+                        starts[i] = (
+                            start_pos.x,
+                            start_pos.y,
+                            manager.ROBOT_RADIUS,
+                        )
+                        goals[i] = (
+                            goal_pos.x,
+                            goal_pos.y,
+                            manager.ROBOT_RADIUS,
+                        )
                     self.obstacles_manager.reset_pos_obstacles_random(
                         forbidden_zones=starts + goals
                     )
@@ -111,7 +125,9 @@ class StagedMARLRandomTask(RandomMARLTask):
         rospy.set_param("/curr_stage", self._curr_stage)
 
         # hyperparamters.json location
-        self.json_file = os.path.join(self._PATHS.get("model"), "hyperparameters.json")
+        self.json_file = os.path.join(
+            self._PATHS.get("model"), "hyperparameters.json"
+        )
         assert os.path.isfile(self.json_file), (
             "Found no 'hyperparameters.json' at %s" % self.json_file
         )
@@ -178,7 +194,7 @@ class StagedMARLRandomTask(RandomMARLTask):
         )
 
         print(
-            f"({self.ns}) Stage {self._curr_stage}:" 
+            f"({self.ns}) Stage {self._curr_stage}:"
             f"Spawning {static_obstacles} static and {dynamic_obstacles} dynamic obstacles!"
         )
 
@@ -226,7 +242,11 @@ def get_mode(mode: str) -> ARENA_TASKS:
 
 
 def get_MARL_task(
-    ns: str, mode: str, robot_names: List[str], start_stage: int = 1, PATHS: dict = None
+    ns: str,
+    mode: str,
+    robot_names: List[str],
+    start_stage: int = 1,
+    PATHS: dict = None,
 ) -> Type[ABSMARLTask]:
     assert type(robot_names) is list
 
@@ -240,7 +260,9 @@ def get_MARL_task(
     models_folder_path = rospkg.RosPack().get_path("simulator_setup")
 
     # robot's yaml file is needed to get its configurations etc.
-    base_robot_yaml = os.path.join(models_folder_path, "robot", "myrobot.model.yaml")
+    base_robot_yaml = os.path.join(
+        models_folder_path, "robot", "myrobot.model.yaml"
+    )
 
     robot_manager = [
         RobotManager(
@@ -259,7 +281,7 @@ def get_MARL_task(
         raise NotImplementedError
     if task_mode == ARENA_TASKS.RANDOM:
         rospy.set_param("/task_mode", "random")
-        obstacles_manager.register_random_obstacles(20, 0.4)
+        obstacles_manager.register_random_obstacles(10, 1.0)
         task = RandomMARLTask(obstacles_manager, robot_manager)
     if task_mode == ARENA_TASKS.STAGED:
         rospy.set_param("/task_mode", "staged")

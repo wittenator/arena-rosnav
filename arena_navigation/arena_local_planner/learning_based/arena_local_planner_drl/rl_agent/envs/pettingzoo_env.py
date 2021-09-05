@@ -1,9 +1,15 @@
-from pettingzoo import *
-from pettingzoo.utils import agent_selector
-from pettingzoo.utils import wrappers
-from pettingzoo.utils.env import AECIterable
+from typing import List, Tuple, Dict, Any, Union
 
-from task_generator.tasks import *
+import numpy as np
+import rospy
+
+from pettingzoo import *
+from pettingzoo.utils import wrappers
+
+from rl_agent.training_agent_wrapper import TrainingDRLAgent
+from task_generator.marl_tasks import get_MARL_task
+
+from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 
 def env():
@@ -21,157 +27,222 @@ def env():
     return env
 
 
-class FlatlandPettingZooEnv(AECEnv):
+class FlatlandPettingZooEnv(ParallelEnv):
     """
-    The AECEnv steps agents one at a time. If you are unsure if you
-    have implemented a AECEnv correctly, try running the `api_test` documented in
+    The Parallel environment steps every live agent at once. If you are unsure if you
+    have implemented a ParallelEnv correctly, try running the `parallel_api_test` in
     the Developer documentation on the website.
     """
 
-    def __init__(self, num_robots: int = 1) -> None:
-        """
-        The init method takes in environment arguments and
-         should define the following attributes:
-        - possible_agents
-        - action_spaces
-        - observation_spaces
+    def __init__(
+        self,
+        ns: str = None,
+        agent_list: List[TrainingDRLAgent] = [],
+        task_mode: str = "random",
+        max_num_moves_per_eps: int = 1000,
+    ) -> None:
+        """[summary]
 
-        These attributes should not be changed after initialization.
+        Description:
+            The init method takes in environment arguments and
+            should define the following attributes:
+            - possible_agents
+            - action_spaces
+            - observation_spaces
+
+            These attributes should not be changed after initialization.
+
+        Args:
+            ns (str, optional): [description]. Defaults to None.
+            agent_list (List[TrainingDRLAgent], optional): [description]. Defaults to [].
+            task_mode (str, optional): [description]. Defaults to "random".
+            max_num_moves_per_eps (int, optional): [description]. Defaults to 1000.
         """
-        self.possible_agents = ["robot_" + str(r) for r in range(num_robots)]
+        self._ns = "" if ns is None or ns == "" else ns + "/"
+        self._is_train_mode = rospy.get_param("/train_mode")
+
+        self.agents = []
+        self.possible_agents = [a._robot_sim_ns for a in agent_list]
         self.agent_name_mapping = dict(
             zip(self.possible_agents, list(range(len(self.possible_agents))))
         )
+        self.agent_object_mapping = dict(zip(self.possible_agents, agent_list))
+        self._robot_sim_ns = [a._robot_sim_ns for a in agent_list]
 
-        # ROBOT CONFIGS
+        self._validate_agent_list()
+
         # action space
+        self.action_spaces = {
+            agent: agent_list[i].action_space
+            for i, agent in enumerate(self.possible_agents)
+        }
 
         # observation space
+        self.observation_spaces = {
+            agent: agent_list[i].observation_space
+            for i, agent in enumerate(self.possible_agents)
+        }
 
-        # task manager + robot managers
+        # task manager
+        self.task_manager = get_MARL_task(
+            ns=ns,
+            mode=task_mode,
+            robot_names=self._robot_sim_ns,
+        )
 
-    def step(self, action) -> None:
-        """
-        receives a dictionary of actions keyed by the agent name.
-        Returns the observation dictionary, reward dictionary, done dictionary, and info dictionary,
-        where each dictionary is keyed by the agent.
-        """
-        raise NotImplementedError
-
-    def reset(self) -> None:
-        """
-        resets the environment and returns a dictionary of observations (keyed by the agent name)
-        """
-        raise NotImplementedError
-
-    def seed(self, seed=None) -> None:
-        """
-        Reseeds the environment (making the resulting environment deterministic).
-        `reset()` must be called after `seed()`, and before `step()`.
-        """
-        pass
-
-    def observe(self, agent) -> None:
-        """
-        Returns the observation an agent currently can make. `last()` calls this function.
-        """
-        raise NotImplementedError
-
-    def render(self, mode="human") -> None:
-        """
-        Displays a rendered frame from the environment, if supported.
-        Alternate render modes in the default environments are `'rgb_array'`
-        which returns a numpy array and is supported by all environments outside of classic,
-        and `'ansi'` which returns the strings printed (specific to classic environments).
-        """
-        raise NotImplementedError
-
-    def state(self) -> None:
-        """
-        State returns a global view of the environment appropriate for
-        centralized training decentralized execution methods like QMIX
-        """
-        raise NotImplementedError(
-            "state() method has not been implemented in the environment {}.".format(
-                self.metadata.get("name", self.__class__.__name__)
+        # service clients
+        if self._is_train_mode:
+            self._service_name_step = f"{self._ns}step_world"
+            self._sim_step_client = rospy.ServiceProxy(
+                self._service_name_step, StepWorld
             )
+
+        self._max_num_moves = max_num_moves_per_eps
+
+    def _validate_agent_list(self) -> None:
+        # check if all agents named differently (target different namespaces)
+        assert len(self.possible_agents) == len(
+            set(self.possible_agents)
+        ), "Robot names and thus there namespaces, have to be unique!"
+
+    def reset(self) -> Dict[str, np.ndarray]:
+        """Resets the environment and returns a dictionary of observations (keyed by the agent name)
+
+        Returns:
+            Dict[str, np.ndarray]: [description]
+        """
+        self.agents = self.possible_agents[:]
+        self.num_moves = 0
+
+        (
+            self.agent_object_mapping[agent].reward_calculator.reset()
+            for agent in self.agents
         )
 
-    def close(self) -> None:
-        """
-        Closes the rendering window, subprocesses, network connections, or any other resources
-        that should be released.
-        """
-        pass
+        self.task_manager.reset()
+        if self._is_train_mode:
+            self._sim_step_client()
 
-    def _dones_step_first(self):
-        """
-        Makes .agent_selection point to first done agent. Stores old value of agent_selection
-        so that _was_done_step can restore the variable after the done agent steps.
-        """
-        _dones_order = [agent for agent in self.agents if self.dones[agent]]
-        if _dones_order:
-            self._skip_agent_selection = self.agent_selection
-            self.agent_selection = _dones_order[0]
-        return self.agent_selection
+        observations = {
+            agent: self.agent_object_mapping[agent].get_observations()[0]
+            for agent in self.agents
+        }
 
-    def agent_iter(self, max_iter=2 ** 63):
-        """
-        yields the current agent (self.agent_selection) when used in a loop where you step() each iteration.
-        """
-        return AECIterable(self, max_iter)
+        return observations
 
-    def last(self, observe=True):
+    def step(
+        self, actions: Dict[str, np.ndarray]
+    ) -> Tuple[
+        Dict[str, np.ndarray],
+        Dict[str, float],
+        Dict[str, bool],
+        Dict[str, Dict[str, Any]],
+    ]:
+        """[summary]
+
+        Description:
+            Receives a dictionary of actions keyed by the agent name.
+            Returns the observation dictionary, reward dictionary, done dictionary,
+            and info dictionary, where each dictionary is keyed by the agent.
+
+        Args:
+            actions (Dict[str, np.ndarray]): [description]
+
+        Returns:
+            Tuple[ Dict[str, np.ndarray], Dict[str, float], Dict[str, bool], Dict[str, Dict[str, Any]], ]:
+                [description]
         """
-        returns observation, cumulative reward, done, info   for the current agent (specified by self.agent_selection)
+        # If a user passes in actions with no agents, then just return empty observations, etc.
+        if not actions:
+            self.agents = []
+            return {}, {}, {}, {}
+
+        # actions
+        for agent, action in actions.items():
+            self.agent_object_mapping[agent].publish_action(action)
+
+        # fast-forward simulation
+        self.call_service_takeSimStep()
+        self.num_moves += 1
+
+        merged_obs, rewards, reward_infos = {}, {}, {}
+
+        for agent in self.agents:
+            # observations
+            merged, _dict = self.agent_object_mapping[agent].get_observations()
+            merged_obs[agent] = merged
+
+            # rewards and infos
+            reward, reward_info = self.agent_object_mapping[agent].get_reward(
+                action=actions[agent], obs_dict=_dict
+            )
+            rewards[agent], reward_infos[agent] = reward, reward_info
+
+        # dones & infos
+        dones, infos = self._get_dones(reward_infos), self._get_infos(
+            reward_infos
+        )
+
+        return merged_obs, rewards, dones, infos
+
+    @property
+    def max_num_agents(self):
+        return len(self.agents)
+
+    def call_service_takeSimStep(self, t: float = None):
+        """Fast-forwards the simulation time.
+
+        Args:
+            t (float, optional):
+                Time in seconds. When t is None, time is forwarded by 'step_size' s.
+                Defaults to None.
         """
-        agent = self.agent_selection
-        observation = self.observe(agent) if observe else None
+        request = StepWorldRequest() if t is None else StepWorldRequest(t)
+
+        try:
+            response = self._sim_step_client(request)
+            rospy.logdebug("step service=", response)
+        except rospy.ServiceException as e:
+            rospy.logdebug("step Service call failed: %s" % e)
+
+    def _get_dones(
+        self, reward_infos: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, bool]:
+        """[summary]
+
+        Args:
+            reward_infos (Dict[str, Dict[str, Any]]): [description]
+
+        Returns:
+            Dict[str, bool]: [description]
+        """
         return (
-            observation,
-            self._cumulative_rewards[agent],
-            self.dones[agent],
-            self.infos[agent],
+            {agent: reward_infos[agent]["is_done"] for agent in self.agents}
+            if self.num_moves < self._max_num_moves
+            else {agent: True for agent in self.agents}
         )
 
-    def _was_done_step(self, action):
+    def _get_infos(
+        self, reward_infos: Dict[str, Dict[str, Any]]
+    ) -> Dict[str, Dict[str, Any]]:
+        """[summary]
+
+        Args:
+            reward_infos (Dict[str, Dict[str, Any]]): [description]
+
+        Returns:
+            Dict[str, Dict[str, Any]]: [description]
         """
-        Helper function that performs step() for done agents.
-
-        Does the following:
-
-        1. Removes done agent from .agents, .dones, .rewards, ._cumulative_rewards, and .infos
-        2. Loads next agent into .agent_selection: if another agent is done, loads that one, otherwise load next live agent
-        3. Clear the rewards dict
-
-        Highly recomended to use at the beginning of step as follows:
-
-        def step(self, action):
-            if self.dones[self.agent_selection]:
-                self._was_done_step()
-                return
-            # main contents of step
-        """
-        if action is not None:
-            raise ValueError("when an agent is done, the only valid action is None")
-
-        # removes done agent
-        agent = self.agent_selection
-        assert self.dones[agent], "an agent that was not done as attemted to be removed"
-        del self.dones[agent]
-        del self.rewards[agent]
-        del self._cumulative_rewards[agent]
-        del self.infos[agent]
-        self.agents.remove(agent)
-
-        # finds next done agent or loads next live agent (Stored in _skip_agent_selection)
-        _dones_order = [agent for agent in self.agents if self.dones[agent]]
-        if _dones_order:
-            if getattr(self, "_skip_agent_selection", None) is None:
-                self._skip_agent_selection = self.agent_selection
-            self.agent_selection = _dones_order[0]
-        else:
-            if getattr(self, "_skip_agent_selection", None) is not None:
-                self.agent_selection = self._skip_agent_selection
-            self._skip_agent_selection = None
-        self._clear_rewards()
+        infos = {agent: {} for agent in self.agents}
+        for agent in self.agents:
+            if reward_infos[agent]["is_done"]:
+                infos[agent] = {
+                    "done_reason": reward_infos[agent]["done_reason"],
+                    "is_success": reward_infos[agent]["is_success"],
+                }
+            elif self.num_moves >= self._max_num_moves:
+                infos[agent] = {
+                    "done_reason": 0,
+                    "is_success": 0,
+                }
+        return infos

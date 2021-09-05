@@ -60,10 +60,11 @@ class BaseDRLAgent(ABC):
         """
         self._is_train_mode = rospy.get_param("/train_mode")
 
-        self._ns = "" if ns is None or ns == "" else "/" + ns + "/"
+        self._ns = "" if ns is None or ns == "" else ns + "/"
         self._ns_robot = (
             self._ns if robot_name is None else self._ns + robot_name + "/"
         )
+        self._robot_sim_ns = robot_name
 
         self.load_hyperparameters(path=hyperparameter_path)
         robot_setting_path = os.path.join(
@@ -165,13 +166,15 @@ class BaseDRLAgent(ABC):
         if self._num_laser_beams is None:
             self._num_laser_beams = DEFAULT_NUM_LASER_BEAMS
             print(
-                f"Wasn't able to read the number of laser beams."
+                f"{self._robot_sim_ns}:"
+                "Wasn't able to read the number of laser beams."
                 "Set to default: {DEFAULT_NUM_LASER_BEAMS}"
             )
         if self._laser_range is None:
             self._laser_range = DEFAULT_LASER_RANGE
             print(
-                f"Wasn't able to read the laser range."
+                f"{self._robot_sim_ns}:"
+                "Wasn't able to read the laser range."
                 "Set to default: {DEFAULT_LASER_RANGE}"
             )
 
@@ -261,8 +264,27 @@ class BaseDRLAgent(ABC):
         """
         merged_obs, obs_dict = self.observation_collector.get_observations()
         if self._agent_params["normalize"]:
-            merged_obs = self._obs_norm_func(merged_obs)
+            self.normalize_observations(merged_obs)
         return merged_obs, obs_dict
+
+    def normalize_observations(self, merged_obs: np.ndarray) -> np.ndarray:
+        """Normalizes the observations with the loaded VecNormalize object.
+
+        Note:
+            VecNormalize object from Stable-Baselines3 is agent specific\
+            and integral part in order to map right actions.\
+
+        Args:
+            merged_obs (np.ndarray):
+                observation data concatenated into one array.
+
+        Returns:
+            np.ndarray: Normalized observations array.
+        """
+        assert self._agent_params["normalize"] and hasattr(
+            self, "_obs_norm_func"
+        )
+        return self._obs_norm_func(merged_obs)
 
     def get_action(self, obs: np.ndarray) -> np.ndarray:
         """Infers an action based on the given observation.
@@ -288,9 +310,11 @@ class BaseDRLAgent(ABC):
 
     def get_reward(self, action: np.ndarray, obs_dict: dict) -> float:
         """Calculates the reward based on the parsed observation
+
         Args:
             action (np.ndarray):
-                Velocity commands of the agent.
+                Velocity commands of the agent\
+                in [linear velocity, angular velocity].
             obs_dict (dict):
                 Observation dictionary where each key makes up a different \
                 kind of information about the environment.
