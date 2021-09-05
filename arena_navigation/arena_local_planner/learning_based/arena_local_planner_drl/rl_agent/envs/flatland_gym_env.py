@@ -14,7 +14,7 @@ from rospy.exceptions import ROSException
 from task_generator.tasks import ABSTask
 import numpy as np
 import rospy
-from geometry_msgs.msg import Twist
+from geometry_msgs.msg import Twist, Pose2D
 from std_msgs.msg import String
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 from std_msgs.msg import Bool

@@ -91,7 +91,13 @@ class DeploymentDRLAgent(BaseDRLAgent):
         with open(vecnorm_file, "rb") as file_handler:
             vec_normalize = pickle.load(file_handler)
 
-        self._agent = PPO.load(model_file).policy
+        custom_objects = {
+            "learning_rate": 0.0,
+            "lr_schedule": lambda _: 0.0,
+            "clip_range": lambda _: 0.0,
+        }
+
+        self._agent = PPO.load(model_file, custom_objects=custom_objects).policy
         self._obs_norm_func = vec_normalize.normalize_obs
 
     def run(self) -> None:

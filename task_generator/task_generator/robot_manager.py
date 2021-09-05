@@ -138,7 +138,7 @@ class RobotManager:
             'simulator_setup'), 'tmp_robot_configs'
         )
         os.makedirs(tmp_folder_path, exist_ok=True)
-        tmp_config_name = self.ROBOT_NAME + ".robot_config.yaml" 
+        tmp_config_name = self.ns + self.ROBOT_NAME + ".robot_config.yaml"
         tmp_config_path = os.path.join(tmp_folder_path, tmp_config_name)
 
         with open(tmp_config_path, 'w') as fd:
