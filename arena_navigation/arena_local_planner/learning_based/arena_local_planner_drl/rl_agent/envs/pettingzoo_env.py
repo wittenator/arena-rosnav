@@ -4,7 +4,7 @@ import numpy as np
 import rospy
 
 from pettingzoo import *
-from pettingzoo.utils import wrappers
+from pettingzoo.utils import wrappers, from_parallel, to_parallel
 import supersuit as ss
 
 
@@ -23,15 +23,15 @@ def env_fn(**kwargs: dict) -> ParallelEnv:
     elsewhere in the developer documentation.
     """
     env = FlatlandPettingZooEnv(**kwargs)
+    #env = from_parallel(env)
     #env = wrappers.CaptureStdoutWrapper(env)
-    #env = wrappers.AssertOutOfBoundsWrapper(env)
     #env = wrappers.OrderEnforcingWrapper(env)
-    env = ss.pad_action_space_v0(env)
-    env = ss.pad_observations_v0(env)
-    env = ss.black_death_v2(env)
+    #env = ss.pad_action_space_v0(env)
+    #env = ss.pad_observations_v0(env)
+    #env = ss.black_death_v2(env)
+    #env = to_parallel(env)
     env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env
-
 
 class FlatlandPettingZooEnv(ParallelEnv):
     """
@@ -172,7 +172,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         merged_obs, rewards, reward_infos = {}, {}, {}
 
-        for agent in self.agents:
+        for agent in actions.keys():
             # observations
             merged, _dict = self.agent_object_mapping[agent].get_observations()
             merged_obs[agent] = merged
