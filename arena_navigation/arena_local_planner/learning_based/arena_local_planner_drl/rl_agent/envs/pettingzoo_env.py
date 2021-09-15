@@ -5,6 +5,8 @@ import rospy
 
 from pettingzoo import *
 from pettingzoo.utils import wrappers
+import supersuit as ss
+
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from task_generator.marl_tasks import get_MARL_task
@@ -12,7 +14,7 @@ from task_generator.marl_tasks import get_MARL_task
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 
-def env():
+def env_fn(**kwargs: dict) -> ParallelEnv:
     """
     The env function wraps the environment in 3 wrappers by default. These
     wrappers contain logic that is common to many pettingzoo environments.
@@ -20,10 +22,14 @@ def env():
     to provide sane error messages. You can find full documentation for these methods
     elsewhere in the developer documentation.
     """
-    env = FlatlandPettingZooEnv()
-    env = wrappers.CaptureStdoutWrapper(env)
-    env = wrappers.AssertOutOfBoundsWrapper(env)
-    env = wrappers.OrderEnforcingWrapper(env)
+    env = FlatlandPettingZooEnv(**kwargs)
+    #env = wrappers.CaptureStdoutWrapper(env)
+    #env = wrappers.AssertOutOfBoundsWrapper(env)
+    #env = wrappers.OrderEnforcingWrapper(env)
+    env = ss.pad_action_space_v0(env)
+    env = ss.pad_observations_v0(env)
+    env = ss.black_death_v2(env)
+    env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env
 
 
@@ -60,6 +66,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         """
         self._ns = "" if ns is None or ns == "" else ns + "/"
         self._is_train_mode = rospy.get_param("/train_mode")
+        self.metadata = {'render.modes': ['human'], "name": "rps_v2"}
 
         self.agents = []
         self.possible_agents = [a._robot_sim_ns for a in agent_list]
@@ -114,10 +121,8 @@ class FlatlandPettingZooEnv(ParallelEnv):
         self.agents = self.possible_agents[:]
         self.num_moves = 0
 
-        (
+        for agent in self.agents:
             self.agent_object_mapping[agent].reward_calculator.reset()
-            for agent in self.agents
-        )
 
         self.task_manager.reset()
         if self._is_train_mode:

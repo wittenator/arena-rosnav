@@ -1,13 +1,26 @@
+import sys
+from functools import partial
+from typing import Callable, List
+
+import cloudpickle
+import dill
 import numpy as np
 import rospy
 import rospkg
 import os
+import supersuit as ss
+from multiprocessing import cpu_count, set_start_method
 
+from stable_baselines3 import PPO
+from supersuit.vector import MakeCPUAsyncConstructor
+from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
+
+set_start_method("fork")
 rospy.set_param("/MARL", True)
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from scripts.deployment.drl_agent_node import DeploymentDRLAgent
-from rl_agent.envs.pettingzoo_env import FlatlandPettingZooEnv
+from rl_agent.envs.pettingzoo_env import FlatlandPettingZooEnv, env_fn
 
 from nav_msgs.srv import GetMap
 
@@ -45,21 +58,21 @@ def instantiate_drl_agents(
 def main():
     rospy.set_param("/MARL", True)
     rospy.init_node(f"USER_NODE", anonymous=True)
+    env = vec_env_create(env_fn, instantiate_drl_agents, 4, 4, 4)
+    model = PPO('MlpPolicy', env, verbose=3, n_steps=16)
+    model.learn(total_timesteps=2000000)
 
-    agent_list = instantiate_drl_agents(num_robots=4, ns="sim_1")
-
-    env = FlatlandPettingZooEnv(ns="sim_1", agent_list=agent_list)
-    obs = env.reset()
-
-    AGENT = DeploymentDRLAgent(
-        agent_name="rule_03", ns="sim_1", robot_name="test1"
-    )
-
-    agent_names = env.agents
-    for _ in range(100000000):
-        actions = {agent: AGENT.get_action(obs[agent]) for agent in agent_names}
-        obs, rewards, dones, infos = env.step(actions)
+def vec_env_create(env_fn: Callable, agent_list_fn: Callable, num_robots: int, num_cpus: int, num_vec_envs: int):
+    testenv = env_fn(ns="sim_1", agent_list=agent_list_fn(ns="sim_1", num_robots=1))
+    observation_space, action_space = testenv.observation_space, testenv.action_space
+    del testenv
+    num_cpus = min(num_cpus, num_vec_envs)
+    vec_env = MakeCPUAsyncConstructor(num_cpus)([partial(env_fn, ns=f"sim_{i}", agent_list=agent_list_fn(num_robots, ns=f"sim_{i}")) for i in range(1, num_vec_envs)], observation_space, action_space)
+    return SB3VecEnvWrapper(vec_env)
 
 
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        sys.exit()
