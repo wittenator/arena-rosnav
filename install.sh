@@ -10,9 +10,8 @@ else
 fi
 
 mkdir -p catkin_ws/src && cd catkin_ws/src
-git clone --depth 1 https://github.com/wittenator/arena-rosnav.git
+git clone --depth 1 --branch MARL_noetic https://github.com/wittenator/arena-rosnav.git
 cd arena-rosnav
-git checkout MARL_noetic
 
 sudo add-apt-repository universe
 sudo add-apt-repository multiverse

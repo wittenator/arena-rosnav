@@ -52,7 +52,7 @@ def main():
     obs = env.reset()
 
     AGENT = DeploymentDRLAgent(
-        agent_name="rule_04", ns="sim_1", robot_name="test1"
+        agent_name="rule_03", ns="sim_1", robot_name="test1"
     )
 
     agent_names = env.agents

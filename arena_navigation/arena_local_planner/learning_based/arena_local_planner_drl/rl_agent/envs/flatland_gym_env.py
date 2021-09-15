@@ -349,7 +349,7 @@ class FlatlandEnv(gym.Env):
         self._last_robot_pose = obs_dict["robot_pose"]
 
     @staticmethod
-    def get_distance(pose_1: Pose2D, pose_2: Pose2D):
+    def get_distance(pose_1, pose_2):
         return math.hypot(pose_2.x - pose_1.x, pose_2.y - pose_1.y)
 
 
