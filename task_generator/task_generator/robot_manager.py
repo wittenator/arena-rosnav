@@ -8,7 +8,13 @@ import rospkg
 import tf
 import yaml
 
-from flatland_msgs.srv import MoveModel, MoveModelRequest, SpawnModelRequest, SpawnModel, StepWorld
+from flatland_msgs.srv import (
+    MoveModel,
+    MoveModelRequest,
+    SpawnModelRequest,
+    SpawnModel,
+    StepWorld,
+)
 from geometry_msgs.msg import Pose2D, PoseStamped
 from nav_msgs.msg import OccupancyGrid
 
@@ -17,18 +23,20 @@ from .utils import generate_freespace_indices, get_random_pos_on_map
 """SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
 MARL = rospy.get_param("MARL", default=False)
 
+
 class RobotManager:
     """
     A manager class using flatland provided services to spawn, move and delete Robot. Currently only one robot
     is managed
     """
+
     def __init__(
-        self, 
-        ns: str, 
-        map_: OccupancyGrid, 
-        robot_yaml_path: str, 
-        robot_name: str="myrobot", 
-        timeout=20
+        self,
+        ns: str,
+        map_: OccupancyGrid,
+        robot_yaml_path: str,
+        robot_name: str = "myrobot",
+        timeout=20,
     ) -> None:
         """[summary]
 
@@ -39,7 +47,7 @@ class RobotManager:
 
         """
         self.ns = ns
-        self.ns_prefix = "" if ns == "" else "/"+ns+"/"
+        self.ns_prefix = "" if ns == "" else "/" + ns + "/"
 
         self.ROBOT_NAME = robot_name
 
@@ -48,34 +56,34 @@ class RobotManager:
 
         self._get_robot_config(robot_yaml_path)
         robot_yaml_path = (
-            self._generate_robot_config_with_adjusted_topics() 
-            if MARL 
+            self._generate_robot_config_with_adjusted_topics()
+            if MARL
             else robot_yaml_path
         )
 
         # setup proxy to handle  services provided by flatland
-        rospy.wait_for_service(f'{self.ns_prefix}move_model', timeout=timeout)
-        rospy.wait_for_service(f'{self.ns_prefix}spawn_model', timeout=timeout)
+        rospy.wait_for_service(f"{self.ns_prefix}move_model", timeout=timeout)
+        rospy.wait_for_service(f"{self.ns_prefix}spawn_model", timeout=timeout)
         self._srv_move_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}move_model', MoveModel
+            f"{self.ns_prefix}move_model", MoveModel
         )
         self._srv_spawn_model = rospy.ServiceProxy(
-            f'{self.ns_prefix}spawn_model', SpawnModel
+            f"{self.ns_prefix}spawn_model", SpawnModel
         )
         # it's only needed in training mode to send the clock signal.
         self._step_world = rospy.ServiceProxy(
-            f'{self.ns_prefix}step_world', StepWorld
+            f"{self.ns_prefix}step_world", StepWorld
         )
 
         # publisher
         goal_topic = (
-            f'{self.ns_prefix}{self.ROBOT_NAME}/goal' 
-            if MARL 
-            else f'{self.ns_prefix}goal'
+            f"{self.ns_prefix}{self.ROBOT_NAME}/goal"
+            if MARL
+            else f"{self.ns_prefix}goal"
         )
         self._goal_pub = rospy.Publisher(
-            f'{goal_topic}', PoseStamped, queue_size=1, latch=True 
-        ) 
+            f"{goal_topic}", PoseStamped, queue_size=1, latch=True
+        )
 
         self.update_map(map_)
         self._spawn_robot(robot_yaml_path)
@@ -97,22 +105,20 @@ class RobotManager:
         Args:
             robot_yaml_path ([type]): [description]
         """
-        with open(robot_yaml_path, 'r') as f:
+        with open(robot_yaml_path, "r") as f:
             self._robot_data = yaml.safe_load(f)
             # get robot radius
-            for body in self._robot_data['bodies']:
-                if body['name'] == "base_footprint":
-                    for footprint in body['footprints']:
-                        if footprint['type'] == 'circle':
+            for body in self._robot_data["bodies"]:
+                if body["name"] == "base_footprint":
+                    for footprint in body["footprints"]:
+                        if footprint["type"] == "circle":
                             self.ROBOT_RADIUS = footprint.setdefault(
-                                'radius', 0.2
+                                "radius", 0.2
                             )
             # get laser_update_rate
-            for plugin in self._robot_data['plugins']:
-                if plugin['type'] == 'Laser':
-                    self.LASER_UPDATE_RATE = plugin.setdefault(
-                        'update_rate', 1
-                    )
+            for plugin in self._robot_data["plugins"]:
+                if plugin["type"] == "Laser":
+                    self.LASER_UPDATE_RATE = plugin.setdefault("update_rate", 1)
 
     def _generate_robot_config_with_adjusted_topics(self) -> str:
         """Generates a robot-specific config file (yaml) where the publication \
@@ -125,23 +131,32 @@ class RobotManager:
         - The namespaces consist of: [simulation ns] / [robot name] / *topic*\
             e.g.: sim_1/myrobot/scan
         - The yaml files are temporarily dumped into *../simulator_setup/tmp_robot_configs*
-        """        
+        """
+        self._robot_data["bodies"]["name"] = (
+            self.ROBOT_NAME + "_" + self._robot_data["bodies"]["name"]
+        )
+
         for plugin in self._robot_data["plugins"]:
             if plugin["type"] == "DiffDrive":
+                plugin["body"] = self._robot_data["bodies"]["name"]
                 plugin["odom_pub"] = self.ROBOT_NAME + "/" + plugin["odom_pub"]
-                plugin["twist_sub"] = self.ROBOT_NAME + "/" + plugin["twist_sub"]
-                
+                plugin["twist_sub"] = (
+                    self.ROBOT_NAME + "/" + plugin["twist_sub"]
+                )
+
             elif plugin["type"] == "Laser":
                 plugin["topic"] = self.ROBOT_NAME + "/" + plugin["topic"]
+                plugin["body"] = self._robot_data["bodies"]["name"]
+                plugin["frame"] = self.ROBOT_NAME + "_" + plugin["frame"]
 
-        tmp_folder_path = os.path.join(rospkg.RosPack().get_path(
-            'simulator_setup'), 'tmp_robot_configs'
+        tmp_folder_path = os.path.join(
+            rospkg.RosPack().get_path("simulator_setup"), "tmp_robot_configs"
         )
         os.makedirs(tmp_folder_path, exist_ok=True)
         tmp_config_name = self.ns + self.ROBOT_NAME + ".robot_config.yaml"
         tmp_config_path = os.path.join(tmp_folder_path, tmp_config_name)
 
-        with open(tmp_config_path, 'w') as fd:
+        with open(tmp_config_path, "w") as fd:
             yaml.dump(self._robot_data, fd)
 
         return tmp_config_path
@@ -172,17 +187,24 @@ class RobotManager:
             # assert self.step_size * \
             #     self.LASER_UPDATE_RATE == 1, f"TO run the traning successfully, make sure the laser_update_rate*step_size == 1 \
             #     \n\tcurrent step_size:\t {self.step_size}\n\tcurrent laser's update rate:\t {self.LASER_UPDATE_RATE} "
-            for _ in range(math.ceil(1/(self.step_size*self.LASER_UPDATE_RATE))):
+            for _ in range(
+                math.ceil(1 / (self.step_size * self.LASER_UPDATE_RATE))
+            ):
                 self._step_world()
 
     def set_start_pos_random(self):
         start_pos = Pose2D()
         start_pos.x, start_pos, start_pos.theta = get_random_pos_on_map(
-            self._free_space_indices, self.map, self.ROBOT_RADIUS)
+            self._free_space_indices, self.map, self.ROBOT_RADIUS
+        )
         self.move_robot(start_pos)
 
-    def set_start_pos_goal_pos(self, start_pos: Union[Pose2D, None]
-                               = None, goal_pos: Union[Pose2D, None] = None, min_dist=1):
+    def set_start_pos_goal_pos(
+        self,
+        start_pos: Union[Pose2D, None] = None,
+        goal_pos: Union[Pose2D, None] = None,
+        min_dist=1,
+    ):
         """Set up start position and the goal postion. Path validation checking will be conducted. If it failed, an
         exception will be raised.
 
@@ -195,7 +217,7 @@ class RobotManager:
         """
 
         def dist(x1, y1, x2, y2):
-            return math.sqrt((x1 - x2)**2 + (y1 - y2)**2)
+            return math.sqrt((x1 - x2) ** 2 + (y1 - y2) ** 2)
 
         if start_pos is None or goal_pos is None:
             # if any of them need to be random generated, we set a higher threshold,otherwise only try once
@@ -210,7 +232,11 @@ class RobotManager:
 
             if start_pos is None:
                 start_pos_ = Pose2D()
-                start_pos_.x, start_pos_.y, start_pos_.theta = get_random_pos_on_map(
+                (
+                    start_pos_.x,
+                    start_pos_.y,
+                    start_pos_.theta,
+                ) = get_random_pos_on_map(
                     self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
                 )
             else:
@@ -218,13 +244,20 @@ class RobotManager:
 
             if goal_pos is None:
                 goal_pos_ = Pose2D()
-                goal_pos_.x, goal_pos_.y, goal_pos_.theta = get_random_pos_on_map(
+                (
+                    goal_pos_.x,
+                    goal_pos_.y,
+                    goal_pos_.theta,
+                ) = get_random_pos_on_map(
                     self._free_space_indices, self.map, self.ROBOT_RADIUS * 2
                 )
             else:
                 goal_pos_ = goal_pos
 
-            if dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y) < min_dist:
+            if (
+                dist(start_pos_.x, start_pos_.y, goal_pos_.x, goal_pos_.y)
+                < min_dist
+            ):
                 i_try += 1
                 continue
             # move the robot to the start pos
