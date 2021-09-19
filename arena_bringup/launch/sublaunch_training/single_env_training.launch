@@ -4,14 +4,18 @@
 
     <!-- Don't change it if you don't know what does it mean! -->
     <arg name="global_frame_id"   value="map"/>
+    <arg name="base_odom_frame_id"     value="odom"/>
+    <arg name="base_base_frame_id"     value="footprint"/>
+
     <arg name="odom_frame_id"     value="$(arg ns)_odom"/>
     <arg name="base_frame_id"     value="$(arg ns)_footprint"/>
 
     <!-- use fake localization-->
     <include file="$(find arena_bringup)/launch/sublaunch_training/fake_localization.launch">
       <arg name="ns"                value="$(arg ns)"/>
+      <arg name="num_robots"                value="$(arg num_robots)"/>
       <arg name="global_frame_id"   value="$(arg global_frame_id)"/>
-      <arg name="odom_frame_id"     value="$(arg odom_frame_id)"/>
+      <arg name="base_odom_frame_id"     value="$(arg base_odom_frame_id)"/>
     </include>
 
     <!-- use move base-->

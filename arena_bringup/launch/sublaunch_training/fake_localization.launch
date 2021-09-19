@@ -2,11 +2,36 @@
 <launch>
   <arg name="ns"/>
   <arg name="global_frame_id"/>
-  <arg name="odom_frame_id"/>
+  <arg name="base_odom_frame_id"/>
+  <arg name="num_robots"/>
+  <arg name="base_robot_name" default="robot"/>
 
-<!-- send fake static transform map_to_odom, which will be used to get localization from odom to map -->
-<node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg odom_frame_id)">
-  <!-- <remap from="/tf_static" to="/$(arg ns)/tf_static"/> -->
-  <remap from="/clock" to="/$(arg ns)/clock"/>
-</node>
+  <param name="base_robot_name" value="$(arg base_robot_name)"/>
+
+  <!-- send fake static transform map_to_odom, which will be used to get localization from odom to map -->
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_1" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)1_$(arg base_odom_frame_id)" if="$(eval num_robots>=1)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_2" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)2_$(arg base_odom_frame_id)" if="$(eval num_robots>=2)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_3" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)3_$(arg base_odom_frame_id)" if="$(eval num_robots>=3)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_4" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)4_$(arg base_odom_frame_id)" if="$(eval num_robots>=4)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_5" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)5_$(arg base_odom_frame_id)" if="$(eval num_robots>=5)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_6" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)6_$(arg base_odom_frame_id)" if="$(eval num_robots>=6)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_7" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)7_$(arg base_odom_frame_id)" if="$(eval num_robots>=7)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+  <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_8" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)8_$(arg base_odom_frame_id)" if="$(eval num_robots>=8)">
+    <remap from="/clock" to="/$(arg ns)/clock"/>
+  </node>
+
 </launch>

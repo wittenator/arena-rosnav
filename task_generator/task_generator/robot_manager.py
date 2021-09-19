@@ -132,13 +132,16 @@ class RobotManager:
             e.g.: sim_1/myrobot/scan
         - The yaml files are temporarily dumped into *../simulator_setup/tmp_robot_configs*
         """
-        self._robot_data["bodies"]["name"] = (
-            self.ROBOT_NAME + "_" + self._robot_data["bodies"]["name"]
+        self._robot_data["bodies"][0]["name"] = (
+            self.ROBOT_NAME + "_" + self._robot_data["bodies"][0]["name"]
         )
 
         for plugin in self._robot_data["plugins"]:
             if plugin["type"] == "DiffDrive":
-                plugin["body"] = self._robot_data["bodies"]["name"]
+                plugin["body"] = self._robot_data["bodies"][0]["name"]
+                plugin["odom_frame_id"] = (
+                    self.ROBOT_NAME + "_" + plugin["odom_frame_id"]
+                )
                 plugin["odom_pub"] = self.ROBOT_NAME + "/" + plugin["odom_pub"]
                 plugin["twist_sub"] = (
                     self.ROBOT_NAME + "/" + plugin["twist_sub"]
@@ -146,7 +149,7 @@ class RobotManager:
 
             elif plugin["type"] == "Laser":
                 plugin["topic"] = self.ROBOT_NAME + "/" + plugin["topic"]
-                plugin["body"] = self._robot_data["bodies"]["name"]
+                plugin["body"] = self._robot_data["bodies"][0]["name"]
                 plugin["frame"] = self.ROBOT_NAME + "_" + plugin["frame"]
 
         tmp_folder_path = os.path.join(
