@@ -230,7 +230,7 @@ class BaseDRLAgent(ABC):
         assert self._agent_params and "reward_fnc" in self._agent_params
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius,
-            safe_dist=1.6 * self._robot_radius,
+            safe_dist=self._robot_radius + 0.3,
             goal_radius=GOAL_RADIUS,
             rule=self._agent_params["reward_fnc"],
             extended_eval=False,
