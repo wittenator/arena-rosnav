@@ -31,7 +31,7 @@ DEFAULT_HYPERPARAMETER = os.path.join(
     "default.json",
 )
 DEFAULT_NUM_LASER_BEAMS, DEFAULT_LASER_RANGE = 360, 3.5
-GOAL_RADIUS = 0.33
+GOAL_RADIUS = 0.5
 
 
 class BaseDRLAgent(ABC):
@@ -264,7 +264,7 @@ class BaseDRLAgent(ABC):
         """
         merged_obs, obs_dict = self.observation_collector.get_observations()
         if self._agent_params["normalize"]:
-            self.normalize_observations(merged_obs)
+            merged_obs = self.normalize_observations(merged_obs)
         return merged_obs, obs_dict
 
     def normalize_observations(self, merged_obs: np.ndarray) -> np.ndarray:
