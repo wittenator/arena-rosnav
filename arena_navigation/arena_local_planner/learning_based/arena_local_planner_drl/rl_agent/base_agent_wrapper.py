@@ -286,17 +286,25 @@ class BaseDRLAgent(ABC):
         )
         return self._obs_norm_func(merged_obs)
 
-    def get_action(self, obs: np.ndarray) -> np.ndarray:
+    def get_action(
+        self, obs: np.ndarray, obs_normalized: bool = False
+    ) -> np.ndarray:
         """Infers an action based on the given observation.
 
         Args:
-            obs (np.ndarray): Merged observation array.
+            obs (np.ndarray):
+                Merged observation array.
+            obs_normalized (bool):
+                Whether the obs array is already normalized.
+                Defaults to False.
 
         Returns:
             np.ndarray:
                 Action in [linear velocity, angular velocity]
         """
         assert self._agent, "Agent model not initialized!"
+        if self._agent_params["normalize"] and not obs_normalized:
+            obs = self.normalize_observations(obs)
         action = self._agent.predict(obs, deterministic=True)[0]
         if self._agent_params["discrete_action_space"]:
             action = self._get_disc_action(action)

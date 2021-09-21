@@ -20,12 +20,12 @@ Panels:
         - /Plan Manager1/goal1
         - /Plan Manager1/subgoal1
         - /MARL1
-        - /MARL1/robot_11/Goal Pose1/Status1
+        - /MARL1/robot_11
         - /MARL1/robot_21
-        - /MARL1/robot_21/Goal Pose1/Status1
         - /MARL1/robot_31
+        - /MARL1/robot_41
       Splitter Ratio: 0.4374079406261444
-    Tree Height: 545
+    Tree Height: 814
   - Class: rviz/Selection
     Name: Selection
   - Class: rviz/Tool Properties
@@ -527,7 +527,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_00
               Name: 0
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -535,7 +535,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_01
               Name: 1
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -543,7 +543,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_02
               Name: 2
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -551,7 +551,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_03
               Name: 3
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -559,7 +559,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_05
               Name: 4
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -567,7 +567,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_06
               Name: 5
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -575,7 +575,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_07
               Name: 6
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -583,7 +583,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_08
               Name: 7
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -591,7 +591,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_09
               Name: 8
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -599,7 +599,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_04
               Name: 9
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1154,89 +1154,97 @@ Visualization Manager:
       Topic: /sim_1/goal
       Unreliable: false
       Value: true
+    - Class: rviz/TF
+      Enabled: true
+      Frame Timeout: 15
+      Frames:
+        All Enabled: false
+        eval_sim_robot1_odom:
+          Value: true
+        eval_sim_robot2_odom:
+          Value: true
+        eval_sim_robot3_odom:
+          Value: true
+        eval_sim_robot4_odom:
+          Value: true
+        eval_sim_robot5_odom:
+          Value: true
+        eval_sim_robot6_odom:
+          Value: true
+        eval_sim_robot7_odom:
+          Value: true
+        eval_sim_robot8_odom:
+          Value: true
+        map:
+          Value: true
+        sim_1_robot1_odom:
+          Value: true
+        sim_1_robot2_odom:
+          Value: true
+        sim_1_robot3_odom:
+          Value: true
+        sim_1_robot4_odom:
+          Value: true
+        sim_1_robot5_odom:
+          Value: true
+        sim_1_robot6_odom:
+          Value: true
+        sim_1_robot7_odom:
+          Value: true
+        sim_1_robot8_odom:
+          Value: true
+      Marker Alpha: 1
+      Marker Scale: 1
+      Name: TF
+      Show Arrows: true
+      Show Axes: true
+      Show Names: true
+      Tree:
+        map:
+          eval_sim_robot1_odom:
+            {}
+          eval_sim_robot2_odom:
+            {}
+          eval_sim_robot3_odom:
+            {}
+          eval_sim_robot4_odom:
+            {}
+          eval_sim_robot5_odom:
+            {}
+          eval_sim_robot6_odom:
+            {}
+          eval_sim_robot7_odom:
+            {}
+          eval_sim_robot8_odom:
+            {}
+          sim_1_robot1_odom:
+            {}
+          sim_1_robot2_odom:
+            {}
+          sim_1_robot3_odom:
+            {}
+          sim_1_robot4_odom:
+            {}
+          sim_1_robot5_odom:
+            {}
+          sim_1_robot6_odom:
+            {}
+          sim_1_robot7_odom:
+            {}
+          sim_1_robot8_odom:
+            {}
+      Update Interval: 0
+      Value: true
     - Class: rviz/Group
       Displays:
         - Class: rviz/Group
           Displays:
-            - Class: rviz/TF
-              Enabled: true
-              Frame Timeout: 15
-              Frames:
-                All Enabled: false
-                eval_sim_robot1_odom:
-                  Value: true
-                eval_sim_robot2_odom:
-                  Value: true
-                eval_sim_robot3_odom:
-                  Value: true
-                eval_sim_robot4_odom:
-                  Value: true
-                map:
-                  Value: true
-                sim_1_robot1_base_footprint:
-                  Value: true
-                sim_1_robot1_laser_link:
-                  Value: true
-                sim_1_robot1_odom:
-                  Value: true
-                sim_1_robot2_base_footprint:
-                  Value: true
-                sim_1_robot2_laser_link:
-                  Value: true
-                sim_1_robot2_odom:
-                  Value: true
-                sim_1_robot3_base_footprint:
-                  Value: true
-                sim_1_robot3_laser_link:
-                  Value: true
-                sim_1_robot3_odom:
-                  Value: true
-                sim_1_robot4_base_footprint:
-                  Value: true
-                sim_1_robot4_laser_link:
-                  Value: true
-                sim_1_robot4_odom:
-                  Value: true
-              Marker Alpha: 1
-              Marker Scale: 1
-              Name: TF
-              Show Arrows: true
-              Show Axes: true
-              Show Names: true
-              Tree:
-                map:
-                  eval_sim_robot1_odom:
-                    {}
-                  eval_sim_robot2_odom:
-                    {}
-                  eval_sim_robot3_odom:
-                    {}
-                  eval_sim_robot4_odom:
-                    {}
-                  sim_1_robot1_odom:
-                    sim_1_robot1_base_footprint:
-                      sim_1_robot1_laser_link:
-                        {}
-                  sim_1_robot2_odom:
-                    sim_1_robot2_base_footprint:
-                      sim_1_robot2_laser_link:
-                        {}
-                  sim_1_robot3_odom:
-                    sim_1_robot3_base_footprint:
-                      sim_1_robot3_laser_link:
-                        {}
-                  sim_1_robot4_odom:
-                    sim_1_robot4_base_footprint:
-                      sim_1_robot4_laser_link:
-                        {}
-              Update Interval: 0
-              Value: true
             - Class: rviz/MarkerArray
               Enabled: true
               Marker Topic: /sim_1/flatland_server/debug/model/robot1
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1259,85 +1267,12 @@ Visualization Manager:
           Name: robot_1
         - Class: rviz/Group
           Displays:
-            - Class: rviz/TF
-              Enabled: true
-              Frame Timeout: 15
-              Frames:
-                All Enabled: false
-                eval_sim_robot1_odom:
-                  Value: true
-                eval_sim_robot2_odom:
-                  Value: true
-                eval_sim_robot3_odom:
-                  Value: true
-                eval_sim_robot4_odom:
-                  Value: true
-                map:
-                  Value: true
-                sim_1_robot1_base_footprint:
-                  Value: true
-                sim_1_robot1_laser_link:
-                  Value: true
-                sim_1_robot1_odom:
-                  Value: true
-                sim_1_robot2_base_footprint:
-                  Value: true
-                sim_1_robot2_laser_link:
-                  Value: true
-                sim_1_robot2_odom:
-                  Value: true
-                sim_1_robot3_base_footprint:
-                  Value: true
-                sim_1_robot3_laser_link:
-                  Value: true
-                sim_1_robot3_odom:
-                  Value: true
-                sim_1_robot4_base_footprint:
-                  Value: true
-                sim_1_robot4_laser_link:
-                  Value: true
-                sim_1_robot4_odom:
-                  Value: true
-              Marker Alpha: 1
-              Marker Scale: 1
-              Name: TF
-              Show Arrows: true
-              Show Axes: true
-              Show Names: true
-              Tree:
-                map:
-                  eval_sim_robot1_odom:
-                    {}
-                  eval_sim_robot2_odom:
-                    {}
-                  eval_sim_robot3_odom:
-                    {}
-                  eval_sim_robot4_odom:
-                    {}
-                  sim_1_robot1_odom:
-                    sim_1_robot1_base_footprint:
-                      sim_1_robot1_laser_link:
-                        {}
-                  sim_1_robot2_odom:
-                    sim_1_robot2_base_footprint:
-                      sim_1_robot2_laser_link:
-                        {}
-                  sim_1_robot3_odom:
-                    sim_1_robot3_base_footprint:
-                      sim_1_robot3_laser_link:
-                        {}
-                  sim_1_robot4_odom:
-                    sim_1_robot4_base_footprint:
-                      sim_1_robot4_laser_link:
-                        {}
-              Update Interval: 0
-              Value: true
             - Class: rviz/MarkerArray
               Enabled: true
               Marker Topic: /sim_1/flatland_server/debug/model/robot2
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1360,85 +1295,12 @@ Visualization Manager:
           Name: robot_2
         - Class: rviz/Group
           Displays:
-            - Class: rviz/TF
-              Enabled: true
-              Frame Timeout: 15
-              Frames:
-                All Enabled: false
-                eval_sim_robot1_odom:
-                  Value: true
-                eval_sim_robot2_odom:
-                  Value: true
-                eval_sim_robot3_odom:
-                  Value: true
-                eval_sim_robot4_odom:
-                  Value: true
-                map:
-                  Value: true
-                sim_1_robot1_base_footprint:
-                  Value: true
-                sim_1_robot1_laser_link:
-                  Value: true
-                sim_1_robot1_odom:
-                  Value: true
-                sim_1_robot2_base_footprint:
-                  Value: true
-                sim_1_robot2_laser_link:
-                  Value: true
-                sim_1_robot2_odom:
-                  Value: true
-                sim_1_robot3_base_footprint:
-                  Value: true
-                sim_1_robot3_laser_link:
-                  Value: true
-                sim_1_robot3_odom:
-                  Value: true
-                sim_1_robot4_base_footprint:
-                  Value: true
-                sim_1_robot4_laser_link:
-                  Value: true
-                sim_1_robot4_odom:
-                  Value: true
-              Marker Alpha: 1
-              Marker Scale: 1
-              Name: TF
-              Show Arrows: true
-              Show Axes: true
-              Show Names: true
-              Tree:
-                map:
-                  eval_sim_robot1_odom:
-                    {}
-                  eval_sim_robot2_odom:
-                    {}
-                  eval_sim_robot3_odom:
-                    {}
-                  eval_sim_robot4_odom:
-                    {}
-                  sim_1_robot1_odom:
-                    sim_1_robot1_base_footprint:
-                      sim_1_robot1_laser_link:
-                        {}
-                  sim_1_robot2_odom:
-                    sim_1_robot2_base_footprint:
-                      sim_1_robot2_laser_link:
-                        {}
-                  sim_1_robot3_odom:
-                    sim_1_robot3_base_footprint:
-                      sim_1_robot3_laser_link:
-                        {}
-                  sim_1_robot4_odom:
-                    sim_1_robot4_base_footprint:
-                      sim_1_robot4_laser_link:
-                        {}
-              Update Interval: 0
-              Value: true
             - Class: rviz/MarkerArray
               Enabled: true
               Marker Topic: /sim_1/flatland_server/debug/model/robot3
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1461,85 +1323,12 @@ Visualization Manager:
           Name: robot_3
         - Class: rviz/Group
           Displays:
-            - Class: rviz/TF
-              Enabled: true
-              Frame Timeout: 15
-              Frames:
-                All Enabled: false
-                eval_sim_robot1_odom:
-                  Value: true
-                eval_sim_robot2_odom:
-                  Value: true
-                eval_sim_robot3_odom:
-                  Value: true
-                eval_sim_robot4_odom:
-                  Value: true
-                map:
-                  Value: true
-                sim_1_robot1_base_footprint:
-                  Value: true
-                sim_1_robot1_laser_link:
-                  Value: true
-                sim_1_robot1_odom:
-                  Value: true
-                sim_1_robot2_base_footprint:
-                  Value: true
-                sim_1_robot2_laser_link:
-                  Value: true
-                sim_1_robot2_odom:
-                  Value: true
-                sim_1_robot3_base_footprint:
-                  Value: true
-                sim_1_robot3_laser_link:
-                  Value: true
-                sim_1_robot3_odom:
-                  Value: true
-                sim_1_robot4_base_footprint:
-                  Value: true
-                sim_1_robot4_laser_link:
-                  Value: true
-                sim_1_robot4_odom:
-                  Value: true
-              Marker Alpha: 1
-              Marker Scale: 1
-              Name: TF
-              Show Arrows: true
-              Show Axes: true
-              Show Names: true
-              Tree:
-                map:
-                  eval_sim_robot1_odom:
-                    {}
-                  eval_sim_robot2_odom:
-                    {}
-                  eval_sim_robot3_odom:
-                    {}
-                  eval_sim_robot4_odom:
-                    {}
-                  sim_1_robot1_odom:
-                    sim_1_robot1_base_footprint:
-                      sim_1_robot1_laser_link:
-                        {}
-                  sim_1_robot2_odom:
-                    sim_1_robot2_base_footprint:
-                      sim_1_robot2_laser_link:
-                        {}
-                  sim_1_robot3_odom:
-                    sim_1_robot3_base_footprint:
-                      sim_1_robot3_laser_link:
-                        {}
-                  sim_1_robot4_odom:
-                    sim_1_robot4_base_footprint:
-                      sim_1_robot4_laser_link:
-                        {}
-              Update Interval: 0
-              Value: true
             - Class: rviz/MarkerArray
               Enabled: true
               Marker Topic: /sim_1/flatland_server/debug/model/robot4
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1602,18 +1391,18 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: -37.19786834716797
+      Scale: -50.035030364990234
       Target Frame: <Fixed Frame>
-      X: 0.46211376786231995
-      Y: 1.5326189994812012
+      X: 2.9625422954559326
+      Y: 0.423883318901062
     Saved: ~
 Window Geometry:
   Displays:
-    collapsed: true
-  Height: 774
-  Hide Left Dock: true
+    collapsed: false
+  Height: 1043
+  Hide Left Dock: false
   Hide Right Dock: false
-  QMainWindow State: 000000ff00000000fd0000000400000000000002b4000002acfc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000005e80000039500000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073000000003d000002ac000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000004f7000002ac00000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
+  QMainWindow State: 000000ff00000000fd0000000400000000000002b4000003b9fc0200000005fb0000001200530065006c0065006300740069006f006e00000001e10000009b0000005c00fffffffb0000001e0054006f006f006c002000500072006f007000650072007400690065007302000005e80000039500000198000000a3fb000000120056006900650077007300200054006f006f02000001df000002110000018500000122fb000000200054006f006f006c002000500072006f0070006500720074006900650073003203000002880000011d000002210000017afb000000100044006900730070006c006100790073010000003d000003b9000000c900ffffff000000010000010f00000270fc0200000003fb0000001e0054006f006f006c002000500072006f00700065007200740069006500730100000041000000780000000000000000fb0000000a00560069006500770073000000002800000270000000a400fffffffb0000001200530065006c0065006300740069006f006e010000025a000000b200000000000000000000000200000490000000a9fc0100000001fb0000000a00560069006500770073030000004e00000080000002e10000019700000003000004a00000003efc0100000002fb0000000800540069006d00650000000000000004a0000004f300fffffffb0000000800540069006d00650100000000000004500000000000000000000004c6000003b900000004000000040000000800000008fc0000000100000002000000010000000a0054006f006f006c00730100000000ffffffff0000000000000000
   Selection:
     collapsed: false
   Time:
@@ -1622,6 +1411,6 @@ Window Geometry:
     collapsed: false
   Views:
     collapsed: false
-  Width: 1271
-  X: 511
-  Y: 201
+  Width: 1920
+  X: 0
+  Y: 0

@@ -47,7 +47,7 @@ def main():
     rospy.init_node(f"USER_NODE", anonymous=True)
 
     agent_list = instantiate_drl_agents(
-        num_robots=2,
+        num_robots=8,
         ns="sim_1",
         robot_name_prefix=rospy.get_param("base_robot_name", default="robot"),
     )
