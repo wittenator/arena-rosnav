@@ -21,9 +21,7 @@ from tools.train_agent_utils import *
 from tools.staged_train_callback import InitiateNewTrainStage
 
 
-def main():
-    args, _ = parse_training_args()
-
+def main(args):
     # in debug mode, we emulate multiprocessing on only one process
     # in order to be better able to locate bugs
     if args.debug:
@@ -118,78 +116,7 @@ def main():
         )
    
     # determine mode
-    if args.custom_mlp:
-        # custom mlp flag
-        model = PPO(
-            "MlpPolicy",
-            env,
-            policy_kwargs=dict(
-                net_arch=args.net_arch, activation_fn=get_act_fn(args.act_fn)
-            ),
-            gamma=params["gamma"],
-            n_steps=params["n_steps"],
-            ent_coef=params["ent_coef"],
-            learning_rate=params["learning_rate"],
-            vf_coef=params["vf_coef"],
-            max_grad_norm=params["max_grad_norm"],
-            gae_lambda=params["gae_lambda"],
-            batch_size=params["m_batch_size"],
-            n_epochs=params["n_epochs"],
-            clip_range=params["clip_range"],
-            tensorboard_log=PATHS["tb"],
-            verbose=1,
-        )
-    elif args.agent is not None:
-        agent: Union[
-            Type[BaseAgent], Type[ActorCriticPolicy]
-        ] = AgentFactory.instantiate(args.agent)
-        if isinstance(agent, BaseAgent):
-            model = PPO(
-                agent.type.value,
-                env,
-                policy_kwargs=agent.get_kwargs(),
-                gamma=params["gamma"],
-                n_steps=params["n_steps"],
-                ent_coef=params["ent_coef"],
-                learning_rate=params["learning_rate"],
-                vf_coef=params["vf_coef"],
-                max_grad_norm=params["max_grad_norm"],
-                gae_lambda=params["gae_lambda"],
-                batch_size=params["m_batch_size"],
-                n_epochs=params["n_epochs"],
-                clip_range=params["clip_range"],
-                tensorboard_log=PATHS.get("tb"),
-                verbose=1,
-            )
-        elif issubclass(agent, ActorCriticPolicy):
-            model = PPO(
-                agent,
-                env,
-                gamma=params["gamma"],
-                n_steps=params["n_steps"],
-                ent_coef=params["ent_coef"],
-                learning_rate=params["learning_rate"],
-                vf_coef=params["vf_coef"],
-                max_grad_norm=params["max_grad_norm"],
-                gae_lambda=params["gae_lambda"],
-                batch_size=params["m_batch_size"],
-                n_epochs=params["n_epochs"],
-                clip_range=params["clip_range"],
-                tensorboard_log=PATHS.get("tb"),
-                verbose=1,
-            )
-        else:
-            raise TypeError(
-                f"Registered agent class {args.agent} is neither of type"
-                "'BaseAgent' or 'ActorCriticPolicy'!"
-            )
-    else:
-        # load flag
-        if os.path.isfile(os.path.join(PATHS["model"], AGENT_NAME + ".zip")):
-            model = PPO.load(os.path.join(PATHS["model"], AGENT_NAME), env)
-        elif os.path.isfile(os.path.join(PATHS["model"], "best_model.zip")):
-            model = PPO.load(os.path.join(PATHS["model"], "best_model"), env)
-        update_hyperparam_model(model, PATHS, params, args.n_envs)
+    model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
     # set num of timesteps to be generated
     n_timesteps = 40000000 if args.n is None else args.n
@@ -213,5 +140,9 @@ def main():
     sys.exit()
 
 
+
+
+
 if __name__ == "__main__":
-    main()
+    args, _ = parse_training_args()
+    main(args)

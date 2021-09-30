@@ -26,9 +26,9 @@ def env_fn(**kwargs: dict) -> ParallelEnv:
     #env = from_parallel(env)
     #env = wrappers.CaptureStdoutWrapper(env)
     #env = wrappers.OrderEnforcingWrapper(env)
-    #env = ss.pad_action_space_v0(env)
-    #env = ss.pad_observations_v0(env)
-    #env = ss.black_death_v2(env)
+    env = ss.pad_action_space_v0(env)
+    env = ss.pad_observations_v0(env)
+    env = ss.black_death_v2(env)
     #env = to_parallel(env)
     env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env

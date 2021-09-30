@@ -1,6 +1,8 @@
 import sys
+from datetime import time
 from functools import partial
 from typing import Callable, List
+from multiprocessing import cpu_count
 
 import numpy as np
 import rospy
@@ -11,6 +13,28 @@ from multiprocessing import cpu_count, set_start_method
 from stable_baselines3 import PPO
 from supersuit.vector import MakeCPUAsyncConstructor
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
+
+from tools.argsparser import parse_marl_training_args
+from tools.train_agent_utils import get_agent_name, get_paths, choose_agent_model, initialize_hyperparameters
+
+import os, sys, rospy, time
+
+from stable_baselines3 import PPO
+from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.callbacks import (
+    EvalCallback,
+    StopTrainingOnRewardThreshold,
+)
+from stable_baselines3.common.policies import BasePolicy
+
+from rl_agent.model.agent_factory import AgentFactory
+from rl_agent.model.base_agent import BaseAgent
+from rl_agent.model.custom_policy import *
+from rl_agent.model.custom_sb3_policy import *
+from tools.argsparser import parse_training_args
+from tools.custom_mlp_utils import *
+from tools.train_agent_utils import *
+from tools.staged_train_callback import InitiateNewTrainStage
 
 set_start_method("fork")
 rospy.set_param("/MARL", True)
@@ -52,12 +76,43 @@ def instantiate_drl_agents(
     ]
 
 
-def main():
+def main(args):
+    # generate agent name and model specific paths
+    AGENT_NAME = get_agent_name(args)
+    PATHS = get_paths(AGENT_NAME, args)
+
+    # initialize hyperparameters (save to/ load from json)
+    params = initialize_hyperparameters(
+        PATHS=PATHS,
+        load_target=args.load,
+        config_name=args.config,
+        n_envs=args.n_envs,
+    )
+
     rospy.set_param("/MARL", True)
     rospy.init_node(f"USER_NODE", anonymous=True)
-    env = vec_env_create(env_fn, instantiate_drl_agents, 2, 1, 2)
-    model = PPO("MlpPolicy", env, verbose=3, n_steps=16)
-    model.learn(total_timesteps=2000000)
+    env = vec_env_create(env_fn, instantiate_drl_agents, num_robots=args.robots, num_cpus=cpu_count()-1, num_vec_envs=args.n_envs)
+    model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
+
+    # set num of timesteps to be generated
+    n_timesteps = 40000000 if args.n is None else args.n
+
+    start = time.time()
+    try:
+        model.learn(
+            total_timesteps=n_timesteps,
+            reset_num_timesteps=True,
+        )
+    except KeyboardInterrupt:
+        print("KeyboardInterrupt..")
+    # finally:
+    # update the timesteps the model has trained in total
+    # update_total_timesteps_json(n_timesteps, PATHS)
+
+    model.env.close()
+    print(f"Time passed: {time.time() - start}s")
+    print("Training script will be terminated")
+    sys.exit()
 
 
 def vec_env_create(
@@ -81,7 +136,5 @@ def vec_env_create(
 
 
 if __name__ == "__main__":
-    try:
-        main()
-    except KeyboardInterrupt:
-        sys.exit()
+    args, _ = parse_marl_training_args()
+    main(args)

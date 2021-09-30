@@ -49,7 +49,7 @@ poetry install
 
 rosws update
 
-echo "export PYTHONPATH=${PWD}:\$PYTHONPATH" >> ~/.${CURSHELL}rc
+echo "export PYTHONPATH=${PWD}:${PWD}/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
 source ~/.${CURSHELL}rc
 poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Debug
