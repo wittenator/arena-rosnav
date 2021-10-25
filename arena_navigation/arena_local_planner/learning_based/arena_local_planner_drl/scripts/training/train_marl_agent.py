@@ -90,12 +90,12 @@ def main(args):
     )
 
     rospy.set_param("/MARL", True)
-    rospy.init_node(f"USER_NODE", anonymous=True)
     env = vec_env_create(env_fn, instantiate_drl_agents, num_robots=args.robots, num_cpus=cpu_count()-1, num_vec_envs=args.n_envs)
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
     # set num of timesteps to be generated
     n_timesteps = 40000000 if args.n is None else args.n
+
 
     start = time.time()
     try:
