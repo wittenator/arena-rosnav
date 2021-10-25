@@ -169,7 +169,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         # actions
         for agent in self.possible_agents:
-            if agent in actions.keys():
+            if agent in actions:
                 self.agent_object_mapping[agent].publish_action(actions[agent])
             else:
                 noop = np.zeros(shape=self.observation_space(agent).shape)
@@ -181,7 +181,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         merged_obs, rewards, reward_infos = {}, {}, {}
 
-        for agent in actions.keys():
+        for agent in actions:
             # observations
             merged, _dict = self.agent_object_mapping[agent].get_observations()
             merged_obs[agent] = merged
