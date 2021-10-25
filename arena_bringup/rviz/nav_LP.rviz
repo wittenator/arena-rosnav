@@ -24,6 +24,14 @@ Panels:
         - /MARL1/robot_21
         - /MARL1/robot_31
         - /MARL1/robot_41
+        - /MARL1/robot_51
+        - /MARL1/robot_61/my_robot1
+        - /MARL1/robot_61/Goal Pose1
+        - /MARL1/robot_71/my_robot1
+        - /MARL1/robot_71/Goal Pose1
+        - /MARL1/robot_81
+        - /MARL1/robot_81/my_robot1
+        - /MARL1/robot_81/Goal Pose1
       Splitter Ratio: 0.4374079406261444
     Tree Height: 814
   - Class: rviz/Selection
@@ -527,7 +535,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_00
               Name: 0
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -535,7 +543,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_01
               Name: 1
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -543,7 +551,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_02
               Name: 2
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -551,7 +559,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_03
               Name: 3
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -559,7 +567,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_05
               Name: 4
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -567,7 +575,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_06
               Name: 5
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -575,7 +583,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_07
               Name: 6
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -583,7 +591,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_08
               Name: 7
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -591,7 +599,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_09
               Name: 8
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -599,7 +607,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_04
               Name: 9
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Class: rviz/MarkerArray
@@ -1177,21 +1185,69 @@ Visualization Manager:
           Value: true
         map:
           Value: true
+        sim_1_robot1_base_footprint:
+          Value: true
+        sim_1_robot1_laser_link:
+          Value: true
         sim_1_robot1_odom:
+          Value: true
+        sim_1_robot2_base_footprint:
+          Value: true
+        sim_1_robot2_laser_link:
           Value: true
         sim_1_robot2_odom:
           Value: true
+        sim_1_robot3_base_footprint:
+          Value: true
+        sim_1_robot3_laser_link:
+          Value: true
         sim_1_robot3_odom:
+          Value: true
+        sim_1_robot4_base_footprint:
+          Value: true
+        sim_1_robot4_laser_link:
           Value: true
         sim_1_robot4_odom:
           Value: true
+        sim_1_robot5_base_footprint:
+          Value: true
+        sim_1_robot5_laser_link:
+          Value: true
         sim_1_robot5_odom:
+          Value: true
+        sim_1_robot6_base_footprint:
+          Value: true
+        sim_1_robot6_laser_link:
           Value: true
         sim_1_robot6_odom:
           Value: true
+        sim_1_robot7_base_footprint:
+          Value: true
+        sim_1_robot7_laser_link:
+          Value: true
         sim_1_robot7_odom:
           Value: true
+        sim_1_robot8_base_footprint:
+          Value: true
+        sim_1_robot8_laser_link:
+          Value: true
         sim_1_robot8_odom:
+          Value: true
+        sim_2_robot1_odom:
+          Value: true
+        sim_2_robot2_odom:
+          Value: true
+        sim_2_robot3_odom:
+          Value: true
+        sim_2_robot4_odom:
+          Value: true
+        sim_2_robot5_odom:
+          Value: true
+        sim_2_robot6_odom:
+          Value: true
+        sim_2_robot7_odom:
+          Value: true
+        sim_2_robot8_odom:
           Value: true
       Marker Alpha: 1
       Marker Scale: 1
@@ -1218,20 +1274,52 @@ Visualization Manager:
           eval_sim_robot8_odom:
             {}
           sim_1_robot1_odom:
-            {}
+            sim_1_robot1_base_footprint:
+              sim_1_robot1_laser_link:
+                {}
           sim_1_robot2_odom:
-            {}
+            sim_1_robot2_base_footprint:
+              sim_1_robot2_laser_link:
+                {}
           sim_1_robot3_odom:
-            {}
+            sim_1_robot3_base_footprint:
+              sim_1_robot3_laser_link:
+                {}
           sim_1_robot4_odom:
-            {}
+            sim_1_robot4_base_footprint:
+              sim_1_robot4_laser_link:
+                {}
           sim_1_robot5_odom:
-            {}
+            sim_1_robot5_base_footprint:
+              sim_1_robot5_laser_link:
+                {}
           sim_1_robot6_odom:
-            {}
+            sim_1_robot6_base_footprint:
+              sim_1_robot6_laser_link:
+                {}
           sim_1_robot7_odom:
-            {}
+            sim_1_robot7_base_footprint:
+              sim_1_robot7_laser_link:
+                {}
           sim_1_robot8_odom:
+            sim_1_robot8_base_footprint:
+              sim_1_robot8_laser_link:
+                {}
+          sim_2_robot1_odom:
+            {}
+          sim_2_robot2_odom:
+            {}
+          sim_2_robot3_odom:
+            {}
+          sim_2_robot4_odom:
+            {}
+          sim_2_robot5_odom:
+            {}
+          sim_2_robot6_odom:
+            {}
+          sim_2_robot7_odom:
+            {}
+          sim_2_robot8_odom:
             {}
       Update Interval: 0
       Value: true
@@ -1244,7 +1332,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot1
               Name: my_robot
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1272,7 +1360,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot2
               Name: my_robot
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1300,7 +1388,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot3
               Name: my_robot
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1328,7 +1416,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot4
               Name: my_robot
               Namespaces:
-                {}
+                "": true
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1349,6 +1437,146 @@ Visualization Manager:
               Value: true
           Enabled: true
           Name: robot_4
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /sim_1/flatland_server/debug/model/robot5
+              Name: my_robot
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.10000000149011612
+              Class: rviz/Pose
+              Color: 0; 255; 0
+              Enabled: true
+              Head Length: 0.10000000149011612
+              Head Radius: 0.15000000596046448
+              Name: Goal Pose
+              Queue Size: 10
+              Shaft Length: 0.5
+              Shaft Radius: 0.029999999329447746
+              Shape: Arrow
+              Topic: /sim_1/robot6/goal
+              Unreliable: false
+              Value: true
+          Enabled: true
+          Name: robot_5
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /sim_1/flatland_server/debug/model/obstacle__random_dynamic_06
+              Name: my_robot
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.10000000149011612
+              Class: rviz/Pose
+              Color: 0; 255; 0
+              Enabled: true
+              Head Length: 0.10000000149011612
+              Head Radius: 0.15000000596046448
+              Name: Goal Pose
+              Queue Size: 10
+              Shaft Length: 0.5
+              Shaft Radius: 0.029999999329447746
+              Shape: Arrow
+              Topic: /sim_1/robot6/goal
+              Unreliable: false
+              Value: true
+          Enabled: true
+          Name: robot_6
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /sim_1/flatland_server/debug/model/robot7
+              Name: my_robot
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.10000000149011612
+              Class: rviz/Pose
+              Color: 0; 255; 0
+              Enabled: true
+              Head Length: 0.10000000149011612
+              Head Radius: 0.15000000596046448
+              Name: Goal Pose
+              Queue Size: 10
+              Shaft Length: 0.5
+              Shaft Radius: 0.029999999329447746
+              Shape: Arrow
+              Topic: /sim_1/robot7/goal
+              Unreliable: false
+              Value: true
+          Enabled: true
+          Name: robot_7
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /sim_1/flatland_server/debug/model/robot8
+              Name: my_robot
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.10000000149011612
+              Class: rviz/Pose
+              Color: 0; 255; 0
+              Enabled: true
+              Head Length: 0.10000000149011612
+              Head Radius: 0.15000000596046448
+              Name: Goal Pose
+              Queue Size: 10
+              Shaft Length: 0.5
+              Shaft Radius: 0.029999999329447746
+              Shape: Arrow
+              Topic: /sim_1/robot8/goal
+              Unreliable: false
+              Value: true
+          Enabled: true
+          Name: robot_8
+        - Class: rviz/Group
+          Displays:
+            - Class: rviz/MarkerArray
+              Enabled: true
+              Marker Topic: /sim_1/flatland_server/debug/model/robot4
+              Name: my_robot
+              Namespaces:
+                "": true
+              Queue Size: 100
+              Value: true
+            - Alpha: 1
+              Axes Length: 1
+              Axes Radius: 0.10000000149011612
+              Class: rviz/Pose
+              Color: 0; 255; 0
+              Enabled: true
+              Head Length: 0.10000000149011612
+              Head Radius: 0.15000000596046448
+              Name: Goal Pose
+              Queue Size: 10
+              Shaft Length: 0.5
+              Shaft Radius: 0.029999999329447746
+              Shape: Arrow
+              Topic: /sim_1/robot4/goal
+              Unreliable: false
+              Value: true
+          Enabled: true
+          Name: robot_9
       Enabled: true
       Name: MARL
   Enabled: true
@@ -1391,10 +1619,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: -50.035030364990234
+      Scale: 41.73602294921875
       Target Frame: <Fixed Frame>
-      X: 2.9625422954559326
-      Y: 0.423883318901062
+      X: 1.4056235551834106
+      Y: -1.0405430793762207
     Saved: ~
 Window Geometry:
   Displays:
