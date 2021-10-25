@@ -15,7 +15,12 @@ from supersuit.vector import MakeCPUAsyncConstructor
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
 from tools.argsparser import parse_marl_training_args
-from tools.train_agent_utils import get_agent_name, get_paths, choose_agent_model, initialize_hyperparameters
+from tools.train_agent_utils import (
+    get_agent_name,
+    get_paths,
+    choose_agent_model,
+    initialize_hyperparameters,
+)
 
 import os, sys, rospy, time
 
@@ -90,12 +95,17 @@ def main(args):
     )
 
     rospy.set_param("/MARL", True)
-    env = vec_env_create(env_fn, instantiate_drl_agents, num_robots=args.robots, num_cpus=cpu_count()-1, num_vec_envs=args.n_envs)
+    env = vec_env_create(
+        env_fn,
+        instantiate_drl_agents,
+        num_robots=args.robots,
+        num_cpus=cpu_count() - 1,
+        num_vec_envs=args.n_envs,
+    )
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
     # set num of timesteps to be generated
     n_timesteps = 40000000 if args.n is None else args.n
-
 
     start = time.time()
     try:
@@ -135,7 +145,9 @@ def vec_env_create(
     observation_space = env.observation_space
 
     num_cpus = min(num_cpus, num_vec_envs)
-    vec_env = MakeCPUAsyncConstructor(num_cpus)([lambda: env] + env_list_fns, observation_space, action_space)
+    vec_env = MakeCPUAsyncConstructor(num_cpus)(
+        [lambda: env] + env_list_fns, observation_space, action_space
+    )
     return SB3VecEnvWrapper(vec_env)
 
 
