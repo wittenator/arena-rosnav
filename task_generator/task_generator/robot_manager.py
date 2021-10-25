@@ -3,6 +3,8 @@ from typing import Union
 
 import math
 import os
+
+from torch.nn.modules.module import T
 import rospy
 import rospkg
 import tf
@@ -19,9 +21,6 @@ from geometry_msgs.msg import Pose2D, PoseStamped
 from nav_msgs.msg import OccupancyGrid
 
 from .utils import generate_freespace_indices, get_random_pos_on_map
-
-"""SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
-MARL = rospy.get_param("MARL", default=False)
 
 
 class RobotManager:
@@ -46,6 +45,9 @@ class RobotManager:
             robot_yaml_path (str): the file name of the base robot yaml file.
 
         """
+        """SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
+        MARL = rospy.get_param("num_robots") > 1
+
         self.ns = ns
         self.ns_prefix = "" if ns == "" else "/" + ns + "/"
 
@@ -64,6 +66,7 @@ class RobotManager:
         # setup proxy to handle  services provided by flatland
         rospy.wait_for_service(f"{self.ns_prefix}move_model", timeout=timeout)
         rospy.wait_for_service(f"{self.ns_prefix}spawn_model", timeout=timeout)
+
         self._srv_move_model = rospy.ServiceProxy(
             f"{self.ns_prefix}move_model", MoveModel
         )

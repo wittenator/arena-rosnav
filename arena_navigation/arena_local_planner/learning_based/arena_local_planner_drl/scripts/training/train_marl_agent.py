@@ -42,7 +42,6 @@ from tools.train_agent_utils import *
 from tools.staged_train_callback import InitiateNewTrainStage
 
 set_start_method("fork")
-rospy.set_param("/MARL", True)
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from scripts.deployment.drl_agent_node import DeploymentDRLAgent
@@ -94,26 +93,19 @@ def main(args):
         n_envs=args.n_envs,
     )
 
-    rospy.set_param("/MARL", True)
-
-
-
-    exit()
     agent_list = instantiate_drl_agents(
-        num_robots=2,
+        num_robots=3,
         ns="sim_1",
         robot_name_prefix=rospy.get_param("base_robot_name", default="robot"),
     )
-    env = SB3VecEnvWrapper(env_fn(
-        ns="sim_1",
-        agent_list=agent_list))
-    #env = vec_env_create(
+    env = SB3VecEnvWrapper(env_fn(ns="sim_1", agent_list=agent_list))
+    # env = vec_env_create(
     #    env_fn,
     #    instantiate_drl_agents,
     #    num_robots=args.robots,
     #    num_cpus=cpu_count() - 1,
     #    num_vec_envs=args.n_envs,
-    #)
+    # )
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
     # set num of timesteps to be generated

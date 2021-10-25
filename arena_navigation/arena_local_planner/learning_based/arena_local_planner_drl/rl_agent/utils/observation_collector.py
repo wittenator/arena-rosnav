@@ -26,9 +26,6 @@ from tf.transformations import *
 from gym import spaces
 import numpy as np
 
-"""SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
-MARL = rospy.get_param("MARL", default=False)
-
 
 class ObservationCollector:
     def __init__(
@@ -43,6 +40,9 @@ class ObservationCollector:
             num_lidar_beams (int): [description]
             lidar_range (float): [description]
         """
+        """SET A METHOD TO EXTRACT IF MARL IS BEIN REQUESTED"""
+        MARL = rospy.get_param("num_robots") > 1
+
         self.ns = ns
         if ns is None or ns == "":
             self.ns_prefix = ""

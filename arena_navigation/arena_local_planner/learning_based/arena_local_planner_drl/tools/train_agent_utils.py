@@ -16,10 +16,7 @@ from stable_baselines3.common.policies import ActorCriticPolicy
 from stable_baselines3.common.utils import set_random_seed
 
 
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import (
-    FlatlandEnv,
-)
-from arena_navigation.arena_local_planner.learning_based.arena_local_planner_drl.rl_agent.envs.flatland_gym_env import (
+from rl_agent.envs.flatland_gym_env import (
     FlatlandEnv,
 )
 from rl_agent.model.agent_factory import AgentFactory
@@ -105,7 +102,9 @@ def initialize_hyperparameters(
 
     # dynamically adapt n_steps according to batch size and n envs
     # then update .json
-    check_batch_size(n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"])
+    check_batch_size(
+        n_envs, hyperparams["batch_size"], hyperparams["m_batch_size"]
+    )
     hyperparams["n_steps"] = int(hyperparams["batch_size"] / n_envs)
     write_hyperparameters_json(hyperparams, PATHS)
     print_hyperparameters(hyperparams)
@@ -137,7 +136,9 @@ def load_hyperparameters_json(
     :param config_name: file name of json file when training from scratch
     """
     if from_scratch:
-        doc_location = os.path.join(PATHS.get("hyperparams"), config_name + ".json")
+        doc_location = os.path.join(
+            PATHS.get("hyperparams"), config_name + ".json"
+        )
     else:
         doc_location = os.path.join(PATHS.get("model"), "hyperparameters.json")
 
@@ -149,7 +150,8 @@ def load_hyperparameters_json(
     else:
         if from_scratch:
             raise FileNotFoundError(
-                "Found no '%s.json' in %s" % (config_name, PATHS.get("hyperparams"))
+                "Found no '%s.json' in %s"
+                % (config_name, PATHS.get("hyperparams"))
             )
         else:
             raise FileNotFoundError(
@@ -205,7 +207,9 @@ def check_hyperparam_format(loaded_hyperparams: dict, PATHS: dict) -> None:
         raise TypeError("Parameter 'task_mode' has unknown value")
 
 
-def update_hyperparam_model(model: PPO, PATHS: dict, params: dict, n_envs: int = 1) -> None:
+def update_hyperparam_model(
+    model: PPO, PATHS: dict, params: dict, n_envs: int = 1
+) -> None:
     """
     Updates parameter of loaded PPO agent when it was manually changed in the configs yaml.
 
@@ -303,7 +307,9 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
     PATHS = {
         "model": os.path.join(dir, "agents", agent_name),
         "tb": os.path.join(dir, "training_logs", "tensorboard", agent_name),
-        "eval": os.path.join(dir, "training_logs", "train_eval_log", agent_name),
+        "eval": os.path.join(
+            dir, "training_logs", "train_eval_log", agent_name
+        ),
         "robot_setting": os.path.join(
             rospkg.RosPack().get_path("simulator_setup"),
             "robot",
@@ -311,9 +317,7 @@ def get_paths(agent_name: str, args: argparse.Namespace) -> dict:
         ),
         "hyperparams": os.path.join(dir, "configs", "hyperparameters"),
         "robot_as": os.path.join(dir, "configs", "default_settings.yaml"),
-        "curriculum": os.path.join(
-            dir, "configs", "training_curriculum.yaml"
-        ),
+        "curriculum": os.path.join(dir, "configs", "training_curriculum.yaml"),
     }
     # check for mode
     if args.load is None:
@@ -448,7 +452,9 @@ from stable_baselines3.common.vec_env import VecNormalize
 from stable_baselines3.common.vec_env.base_vec_env import VecEnv
 
 
-def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv):
+def load_vec_normalize(
+    params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv
+):
     if params["normalize"]:
         load_path = os.path.join(PATHS["model"], "vec_normalize.pkl")
         if os.path.isfile(load_path):
@@ -457,7 +463,11 @@ def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv)
             print("Succesfully loaded VecNormalize object from pickle file..")
         else:
             env = VecNormalize(
-                env, training=True, norm_obs=True, norm_reward=False, clip_reward=15
+                env,
+                training=True,
+                norm_obs=True,
+                norm_reward=False,
+                clip_reward=15,
             )
             eval_env = VecNormalize(
                 eval_env,
@@ -467,6 +477,7 @@ def load_vec_normalize(params: dict, PATHS: dict, env: VecEnv, eval_env: VecEnv)
                 clip_reward=15,
             )
         return env, eval_env
+
 
 def choose_agent_model(AGENT_NAME, PATHS, args, env, params):
     if args.custom_mlp:

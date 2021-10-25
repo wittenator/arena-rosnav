@@ -56,15 +56,23 @@ def main():
         robot_name_prefix=rospy.get_param("base_robot_name", default="robot"),
     )
 
-    env = SB3VecEnvWrapper(pettingzoo_env_to_vec_env_v0(black_death_v2(FlatlandPettingZooEnv(
-        ns="sim_1", agent_list=agent_list, max_num_moves_per_eps=2000
-    ))))
+    env = SB3VecEnvWrapper(
+        pettingzoo_env_to_vec_env_v0(
+            black_death_v2(
+                FlatlandPettingZooEnv(
+                    ns="sim_1",
+                    agent_list=agent_list,
+                    max_num_moves_per_eps=2000,
+                )
+            )
+        )
+    )
     obs = env.reset()
 
     AGENT = DeploymentDRLAgent(
         agent_name="rule_04", ns="sim_1", robot_name="test1"
     )
-    model = PPO('MlpPolicy', env)
+    model = PPO("MlpPolicy", env)
     model.learn(
         total_timesteps=200000,
         reset_num_timesteps=True,
