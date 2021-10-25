@@ -1,3 +1,4 @@
+from time import sleep
 from typing import List, Tuple, Dict, Any, Union
 
 import numpy as np
@@ -22,9 +23,9 @@ def env_fn(**kwargs: dict) -> ParallelEnv:
     elsewhere in the developer documentation.
     """
     env = FlatlandPettingZooEnv(**kwargs)
-    env = ss.pad_action_space_v0(env)
-    env = ss.pad_observations_v0(env)
-    env = ss.black_death_v2(env)
+    #env = ss.pad_action_space_v0(env)
+    #env = ss.pad_observations_v0(env)
+    #env = ss.black_death_v2(env)
     env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env
 
@@ -129,9 +130,9 @@ class FlatlandPettingZooEnv(ParallelEnv):
             self.agent_object_mapping[agent].reward_calculator.reset()
 
         self.task_manager.reset()
+
         if self._is_train_mode:
             self._sim_step_client()
-
         observations = {
             agent: self.agent_object_mapping[agent].get_observations()[0]
             for agent in self.agents
