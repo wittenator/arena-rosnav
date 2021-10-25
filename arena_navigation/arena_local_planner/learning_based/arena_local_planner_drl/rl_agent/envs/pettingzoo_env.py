@@ -61,7 +61,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             max_num_moves_per_eps (int, optional): [description]. Defaults to 1000.
         """
         self._ns = "" if ns is None or ns == "" else ns + "/"
-        rospy.init_node(f"train_env_{self._ns}", anonymous=True)
+        rospy.init_node(f"train_env_{self._ns}", disable_signals=False)
         self._is_train_mode = rospy.get_param("/train_mode")
         self.metadata = {"render.modes": ["human"], "name": "rps_v2"}
 
