@@ -11,6 +11,7 @@ setup_args = generate_distutils_setup(
         "rl_agent.model",
         "rl_agent.utils",
         "rl_agent.scripts",
+        "tools",
     ],
 )
 setup(**setup_args)
