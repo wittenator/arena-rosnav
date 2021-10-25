@@ -80,6 +80,9 @@ class BaseDRLAgent(ABC):
 
         # for time controlling in train mode
         self._action_frequency = 1 / rospy.get_param("/robot_action_rate")
+        
+        # internal state for doneness
+        self.done = False
 
         if self._is_train_mode:
             # w/o action publisher node
@@ -302,18 +305,21 @@ class BaseDRLAgent(ABC):
             np.ndarray:
                 Action in [linear velocity, angular velocity]
         """
-        assert self._agent, "Agent model not initialized!"
+        assert self._agent, "Agent model not initialized!"        
         if self._agent_params["normalize"] and not obs_normalized:
             obs = self.normalize_observations(obs)
         action = self._agent.predict(obs, deterministic=True)[0]
-        if self._agent_params["discrete_action_space"]:
-            action = self._get_disc_action(action)
-        else:
-            # clip action
-            action = np.maximum(
-                np.minimum(self._action_space.high, action),
-                self._action_space.low,
-            )
+        
+        action = None
+        if not self.done:
+            if self._agent_params["discrete_action_space"]:
+                action = self._get_disc_action(action)
+            else:
+                # clip action
+                action = np.maximum(
+                    np.minimum(self._action_space.high, action),
+                    self._action_space.low,
+        	    )
         return action
 
     def get_reward(self, action: np.ndarray, obs_dict: dict) -> float:
@@ -329,7 +335,9 @@ class BaseDRLAgent(ABC):
         Returns:
             float: Reward amount
         """
-        return self.reward_calculator.get_reward(action=action, **obs_dict)
+        reward, reward_info = self.reward_calculator.get_reward(action=action, **obs_dict)
+        self.done = reward_info["is_done"] 
+        return reward, reward_info
 
     def publish_action(self, action: np.ndarray) -> None:
         """Publishes an action on 'self._action_pub' (ROS topic).
@@ -338,6 +346,8 @@ class BaseDRLAgent(ABC):
             action (np.ndarray):
                 Action in [linear velocity, angular velocity]
         """
+        if not action:
+            action = [0,0]
         action_msg = Twist()
         action_msg.linear.x = action[0]
         action_msg.angular.z = action[1]

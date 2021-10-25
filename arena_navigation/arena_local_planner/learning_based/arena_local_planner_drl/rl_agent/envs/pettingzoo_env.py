@@ -106,6 +106,12 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         self._max_num_moves = max_num_moves_per_eps
 
+    def observation_space(self, agent):
+        return self.agent_object_mapping[agent].observation_space
+
+    def action_space(self, agent):
+        return self.agent_object_mapping[agent].action_space
+
     def _validate_agent_list(self) -> None:
         # check if all agents named differently (target different namespaces)
         assert len(self.possible_agents) == len(
@@ -163,8 +169,14 @@ class FlatlandPettingZooEnv(ParallelEnv):
             return {}, {}, {}, {}
 
         # actions
-        for agent, action in actions.items():
-            self.agent_object_mapping[agent].publish_action(action)
+        print(actions)
+        for agent in self.possible_agents:
+            if agent in actions.keys():
+                self.agent_object_mapping[agent].publish_action(actions[agent])
+            else:
+                noop = np.zeros(shape=self.observation_space(agent).shape)
+                self.agent_object_mapping[agent].publish_action(noop)
+
 
         # fast-forward simulation
         self.call_service_takeSimStep()
@@ -187,6 +199,8 @@ class FlatlandPettingZooEnv(ParallelEnv):
         dones, infos = self._get_dones(reward_infos), self._get_infos(
             reward_infos
         )
+
+        self.agents = [agent for agent in self.agents if not dones[agent]]
 
         return merged_obs, rewards, dones, infos
 
