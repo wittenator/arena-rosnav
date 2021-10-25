@@ -7,7 +7,6 @@ from pettingzoo import *
 from pettingzoo.utils import wrappers, from_parallel, to_parallel
 import supersuit as ss
 
-
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from task_generator.marl_tasks import get_MARL_task
 
@@ -23,13 +22,9 @@ def env_fn(**kwargs: dict) -> ParallelEnv:
     elsewhere in the developer documentation.
     """
     env = FlatlandPettingZooEnv(**kwargs)
-    #env = from_parallel(env)
-    #env = wrappers.CaptureStdoutWrapper(env)
-    #env = wrappers.OrderEnforcingWrapper(env)
     env = ss.pad_action_space_v0(env)
     env = ss.pad_observations_v0(env)
     env = ss.black_death_v2(env)
-    #env = to_parallel(env)
     env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env
 
@@ -169,7 +164,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
             return {}, {}, {}, {}
 
         # actions
-        print(actions)
         for agent in self.possible_agents:
             if agent in actions.keys():
                 self.agent_object_mapping[agent].publish_action(actions[agent])

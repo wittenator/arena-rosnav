@@ -130,8 +130,12 @@ def vec_env_create(
         )
         for i in range(1, num_vec_envs + 1)
     ]
+    env = env_list_fns.pop(0)()
+    action_space = env.observation_space
+    observation_space = env.observation_space
+
     num_cpus = min(num_cpus, num_vec_envs)
-    vec_env = MakeCPUAsyncConstructor(num_cpus)(env_list_fns, None, None)
+    vec_env = MakeCPUAsyncConstructor(num_cpus)([lambda: env] + env_list_fns, observation_space, action_space)
     return SB3VecEnvWrapper(vec_env)
 
 
