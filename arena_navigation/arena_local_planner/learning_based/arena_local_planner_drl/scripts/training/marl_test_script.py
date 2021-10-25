@@ -3,6 +3,10 @@ import rospy
 import rospkg
 import os
 
+from stable_baselines3 import PPO
+from supersuit import pettingzoo_env_to_vec_env_v0, black_death_v2
+from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
+
 rospy.set_param("/MARL", True)
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
@@ -52,15 +56,19 @@ def main():
         robot_name_prefix=rospy.get_param("base_robot_name", default="robot"),
     )
 
-    env = FlatlandPettingZooEnv(
+    env = SB3VecEnvWrapper(pettingzoo_env_to_vec_env_v0(black_death_v2(FlatlandPettingZooEnv(
         ns="sim_1", agent_list=agent_list, max_num_moves_per_eps=2000
-    )
+    ))))
     obs = env.reset()
 
     AGENT = DeploymentDRLAgent(
         agent_name="rule_04", ns="sim_1", robot_name="test1"
     )
-
+    model = PPO('MlpPolicy', env)
+    model.learn(
+        total_timesteps=200000,
+        reset_num_timesteps=True,
+    )
     agent_names = env.agents
     for _ in range(100000000):
         if not agent_names:

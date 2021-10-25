@@ -7,6 +7,7 @@ import rospy
 from pettingzoo import *
 from pettingzoo.utils import wrappers, from_parallel, to_parallel
 import supersuit as ss
+from stable_baselines3.common.vec_env import VecEnv
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from task_generator.marl_tasks import get_MARL_task
@@ -14,7 +15,7 @@ from task_generator.marl_tasks import get_MARL_task
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 
 
-def env_fn(**kwargs: dict) -> ParallelEnv:
+def env_fn(**kwargs: dict) -> VecEnv:
     """
     The env function wraps the environment in 3 wrappers by default. These
     wrappers contain logic that is common to many pettingzoo environments.
