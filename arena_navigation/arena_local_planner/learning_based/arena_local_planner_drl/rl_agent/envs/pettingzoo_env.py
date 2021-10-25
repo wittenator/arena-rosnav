@@ -123,6 +123,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         """
         self.agents = self.possible_agents[:]
         self.num_moves = 0
+        
 
         for agent in self.agents:
             self.agent_object_mapping[agent].reward_calculator.reset()
