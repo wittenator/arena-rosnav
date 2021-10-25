@@ -28,6 +28,7 @@ def env_fn(**kwargs: dict) -> ParallelEnv:
     env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env
 
+
 class FlatlandPettingZooEnv(ParallelEnv):
     """
     The Parallel environment steps every live agent at once. If you are unsure if you
@@ -60,8 +61,9 @@ class FlatlandPettingZooEnv(ParallelEnv):
             max_num_moves_per_eps (int, optional): [description]. Defaults to 1000.
         """
         self._ns = "" if ns is None or ns == "" else ns + "/"
+        rospy.init_node(f"train_env_{self._ns}", anonymous=True)
         self._is_train_mode = rospy.get_param("/train_mode")
-        self.metadata = {'render.modes': ['human'], "name": "rps_v2"}
+        self.metadata = {"render.modes": ["human"], "name": "rps_v2"}
 
         self.agents = []
         self.possible_agents = [a._robot_sim_ns for a in agent_list]
@@ -170,7 +172,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
             else:
                 noop = np.zeros(shape=self.observation_space(agent).shape)
                 self.agent_object_mapping[agent].publish_action(noop)
-
 
         # fast-forward simulation
         self.call_service_takeSimStep()

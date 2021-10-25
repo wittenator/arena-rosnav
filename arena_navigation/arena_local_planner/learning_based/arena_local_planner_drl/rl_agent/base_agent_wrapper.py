@@ -310,16 +310,14 @@ class BaseDRLAgent(ABC):
             obs = self.normalize_observations(obs)
         action = self._agent.predict(obs, deterministic=True)[0]
 
-        # action = None
-        if not self.done:
-            if self._agent_params["discrete_action_space"]:
-                action = self._get_disc_action(action)
-            else:
-                # clip action
-                action = np.maximum(
-                    np.minimum(self._action_space.high, action),
-                    self._action_space.low,
-                )
+        if self._agent_params["discrete_action_space"]:
+            action = self._get_disc_action(action)
+        else:
+            # clip action
+            action = np.maximum(
+                np.minimum(self._action_space.high, action),
+                self._action_space.low,
+            )
         return action
 
     def get_reward(self, action: np.ndarray, obs_dict: dict) -> float:
