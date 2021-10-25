@@ -44,7 +44,7 @@ def instantiate_drl_agents(
 
 def main():
     rospy.set_param("/MARL", True)
-    rospy.init_node(f"USER_NODE", anonymous=True)
+    # rospy.init_node(f"USER_NODE", anonymous=True)
 
     agent_list = instantiate_drl_agents(
         num_robots=8,
@@ -64,7 +64,8 @@ def main():
     agent_names = env.agents
     for _ in range(100000000):
         if not agent_names:
-            break
+            agent_names = env.possible_agents[:]
+            obs = env.reset()
 
         actions = {agent: AGENT.get_action(obs[agent]) for agent in agent_names}
         obs, rewards, dones, infos = env.step(actions)
