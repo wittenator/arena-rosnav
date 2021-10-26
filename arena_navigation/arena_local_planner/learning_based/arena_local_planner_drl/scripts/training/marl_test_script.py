@@ -8,6 +8,7 @@ from supersuit import pettingzoo_env_to_vec_env_v0, black_death_v2
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
 rospy.set_param("/MARL", True)
+rospy.set_param("/num_robots", 8)
 
 from rl_agent.training_agent_wrapper import TrainingDRLAgent
 from scripts.deployment.drl_agent_node import DeploymentDRLAgent
@@ -77,6 +78,7 @@ def main():
         total_timesteps=200000,
         reset_num_timesteps=True,
     )
+    exit()
     agent_names = env.agents
     for _ in range(100000000):
         if not agent_names:

@@ -1,5 +1,5 @@
 from time import sleep
-from typing import List, Tuple, Dict, Any, Union
+from typing import List, Tuple, Dict, Any, Union, Callable
 
 import numpy as np
 import rospy
@@ -24,9 +24,9 @@ def env_fn(**kwargs: dict) -> VecEnv:
     elsewhere in the developer documentation.
     """
     env = FlatlandPettingZooEnv(**kwargs)
-    #env = ss.pad_action_space_v0(env)
-    #env = ss.pad_observations_v0(env)
-    #env = ss.black_death_v2(env)
+    env = ss.pad_action_space_v0(env)
+    env = ss.pad_observations_v0(env)
+    env = ss.black_death_v2(env)
     env = ss.pettingzoo_env_to_vec_env_v0(env)
     return env
 
@@ -40,8 +40,9 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
     def __init__(
         self,
+        num_agents: int,
+        agent_list_fn: Callable,
         ns: str = None,
-        agent_list: List[TrainingDRLAgent] = [],
         task_mode: str = "random",
         max_num_moves_per_eps: int = 1000,
     ) -> None:
@@ -63,10 +64,11 @@ class FlatlandPettingZooEnv(ParallelEnv):
             max_num_moves_per_eps (int, optional): [description]. Defaults to 1000.
         """
         self._ns = "" if ns is None or ns == "" else ns + "/"
-        rospy.init_node(f"train_env_{ns}", disable_signals=False)
+        #rospy.init_node(f"train_env_{ns}", disable_signals=False, anonymous=True)
         self._is_train_mode = rospy.get_param("/train_mode")
         self.metadata = {"render.modes": ["human"], "name": "rps_v2"}
 
+        agent_list = agent_list_fn(num_agents, ns=ns)
         self.agents = []
         self.possible_agents = [a._robot_sim_ns for a in agent_list]
         self.agent_name_mapping = dict(
@@ -131,13 +133,13 @@ class FlatlandPettingZooEnv(ParallelEnv):
             self.agent_object_mapping[agent].reward_calculator.reset()
 
         self.task_manager.reset()
-
         if self._is_train_mode:
             self._sim_step_client()
         observations = {
             agent: self.agent_object_mapping[agent].get_observations()[0]
             for agent in self.agents
         }
+
 
         return observations
 
@@ -199,6 +201,8 @@ class FlatlandPettingZooEnv(ParallelEnv):
         )
 
         self.agents = [agent for agent in self.agents if not dones[agent]]
+
+        print(infos)
 
         return merged_obs, rewards, dones, infos
 
