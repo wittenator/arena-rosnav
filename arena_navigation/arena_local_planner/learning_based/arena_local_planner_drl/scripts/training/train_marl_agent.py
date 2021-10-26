@@ -125,7 +125,7 @@ def main(args):
 
 
 if __name__ == "__main__":
-    set_start_method("forkserver")
+    set_start_method("fork")
     args, _ = parse_marl_training_args()
     #rospy.init_node("train_env", disable_signals=False, anonymous=True)
     main(args)

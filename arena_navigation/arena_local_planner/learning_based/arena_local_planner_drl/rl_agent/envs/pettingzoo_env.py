@@ -64,7 +64,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
             max_num_moves_per_eps (int, optional): [description]. Defaults to 1000.
         """
         self._ns = "" if ns is None or ns == "" else ns + "/"
-        #rospy.init_node(f"train_env_{ns}", disable_signals=False, anonymous=True)
         self._is_train_mode = rospy.get_param("/train_mode")
         self.metadata = {"render.modes": ["human"], "name": "rps_v2"}
 
@@ -79,17 +78,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         self._validate_agent_list()
 
-        # action space
-        self.action_spaces = {
-            agent: agent_list[i].action_space
-            for i, agent in enumerate(self.possible_agents)
-        }
 
-        # observation space
-        self.observation_spaces = {
-            agent: agent_list[i].observation_space
-            for i, agent in enumerate(self.possible_agents)
-        }
 
         # task manager
         self.task_manager = get_MARL_task(
@@ -175,7 +164,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             if agent in actions:
                 self.agent_object_mapping[agent].publish_action(actions[agent])
             else:
-                noop = np.zeros(shape=self.observation_space(agent).shape)
+                noop = np.zeros(shape=self.action_space(agent).shape)
                 self.agent_object_mapping[agent].publish_action(noop)
 
         # fast-forward simulation
@@ -201,8 +190,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
         )
 
         self.agents = [agent for agent in self.agents if not dones[agent]]
-
-        print(infos)
 
         return merged_obs, rewards, dones, infos
 

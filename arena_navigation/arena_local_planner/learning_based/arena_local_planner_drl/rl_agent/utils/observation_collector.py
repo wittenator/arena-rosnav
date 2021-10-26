@@ -129,7 +129,6 @@ class ObservationCollector:
         if len(self._scan.ranges) > 0:
             scan = self._scan.ranges.astype(np.float32)
         else:
-            print(self._scan.ranges)
             scan = np.zeros(self._laser_num_beams, dtype=float)
 
         rho, theta = ObservationCollector._get_goal_pose_in_robot_frame(

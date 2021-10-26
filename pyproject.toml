@@ -24,9 +24,9 @@ empy = "^3.3.4"
 setuptools = "^56.2.0"
 filelock = "^3.0.12"
 PyQt5 = "^5.15.4"
-SuperSuit = "3.3.0"
 scipy = "^1.7.1"
 PettingZoo = "1.13.1"
+SuperSuit = "^3.3.0"
 
 [tool.poetry.dev-dependencies]
 

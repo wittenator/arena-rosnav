@@ -65,6 +65,7 @@ class BaseDRLAgent(ABC):
             self._ns if robot_name is None else self._ns + robot_name + "/"
         )
         self._robot_sim_ns = robot_name
+        print(robot_name)
 
         self.load_hyperparameters(path=hyperparameter_path)
         robot_setting_path = os.path.join(

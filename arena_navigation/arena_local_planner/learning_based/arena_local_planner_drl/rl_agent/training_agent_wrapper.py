@@ -68,7 +68,6 @@ class TrainingDRLAgent(BaseDRLAgent):
             *args,
             **kwargs
         )
-        print(robot_name)
 
     def setup_agent(self) -> None:
         pass
