@@ -78,8 +78,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
 
         self._validate_agent_list()
 
-
-
         # task manager
         self.task_manager = get_MARL_task(
             ns=ns,
@@ -116,7 +114,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
         """
         self.agents = self.possible_agents[:]
         self.num_moves = 0
-        
 
         for agent in self.agents:
             self.agent_object_mapping[agent].reward_calculator.reset()
@@ -128,7 +125,6 @@ class FlatlandPettingZooEnv(ParallelEnv):
             agent: self.agent_object_mapping[agent].get_observations()[0]
             for agent in self.agents
         }
-
 
         return observations
 

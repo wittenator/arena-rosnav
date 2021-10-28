@@ -79,7 +79,8 @@ def main(args):
 
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=0.9, verbose=1)
+        reward_threshold=0.9, verbose=1
+    )
 
     # instantiate eval environment
     # take task_manager from first sim (currently evaluation only provided for single process)
@@ -106,15 +107,15 @@ def main(args):
     # n_eval_episodes: number of episodes to evaluate agent on
     # eval_freq: evaluate the agent every eval_freq train timesteps
     eval_cb = EvalCallback(
-        eval_env=eval_env,          
-        n_eval_episodes=40,         
-        eval_freq=20000, 
-        log_path=PATHS['eval'],     
-        best_model_save_path=PATHS['model'], 
-        deterministic=True,         
-        callback_on_new_best=stoptraining_cb
-        )
-   
+        eval_env=eval_env,
+        n_eval_episodes=40,
+        eval_freq=20000,
+        log_path=PATHS["eval"],
+        best_model_save_path=PATHS["model"],
+        deterministic=True,
+        callback_on_new_best=stoptraining_cb,
+    )
+
     # determine mode
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
@@ -138,9 +139,6 @@ def main(args):
     print(f"Time passed: {time.time()-start}s")
     print("Training script will be terminated")
     sys.exit()
-
-
-
 
 
 if __name__ == "__main__":

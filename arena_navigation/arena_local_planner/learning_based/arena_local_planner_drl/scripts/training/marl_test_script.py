@@ -4,6 +4,7 @@ import rospkg
 import os
 
 from stable_baselines3 import PPO
+from stable_baselines3.common.callbacks import MarlEvalCallback
 from supersuit import pettingzoo_env_to_vec_env_v0, black_death_v2
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
@@ -48,21 +49,22 @@ def instantiate_drl_agents(
 
 
 def main():
-    rospy.set_param("/MARL", True)
     # rospy.init_node(f"USER_NODE", anonymous=True)
 
-    agent_list = instantiate_drl_agents(
-        num_robots=8,
-        ns="sim_1",
-        robot_name_prefix=rospy.get_param("base_robot_name", default="robot"),
-    )
+    # agent_list = instantiate_drl_agents(
+    #     num_robots=8,
+    #     ns="sim_1",
+    #     robot_name_prefix=rospy.get_param("base_robot_name", default="robot"),
+    # )
+    NUM_ROBOTS = 8
 
     env = SB3VecEnvWrapper(
         pettingzoo_env_to_vec_env_v0(
             black_death_v2(
                 FlatlandPettingZooEnv(
+                    num_agents=NUM_ROBOTS,
                     ns="sim_1",
-                    agent_list=agent_list,
+                    agent_list_fn=instantiate_drl_agents,
                     max_num_moves_per_eps=2000,
                 )
             )
@@ -70,12 +72,16 @@ def main():
     )
     obs = env.reset()
 
-    AGENT = DeploymentDRLAgent(
-        agent_name="rule_04", ns="sim_1", robot_name="test1"
-    )
+    # AGENT = DeploymentDRLAgent(
+    #     agent_name="rule_04", ns="sim_1", robot_name="test1"
+    # )
+
     model = PPO("MlpPolicy", env)
     model.learn(
         total_timesteps=200000,
+        callbacks=get_evalcallback(
+            num_robots=NUM_ROBOTS,
+        ),
         reset_num_timesteps=True,
     )
     exit()
@@ -96,6 +102,23 @@ def main():
             for agent in done_agents:
                 if infos[agent]["is_success"]:
                     print(f"{agent}: finito")
+
+
+def get_evalcallback(num_robots: int) -> MarlEvalCallback:
+    eval_env = FlatlandPettingZooEnv(
+        num_agents=num_robots,
+        ns="eval_sim",
+        agent_list_fn=instantiate_drl_agents,
+        max_num_moves_per_eps=2000,
+    )
+
+    return MarlEvalCallback(
+        eval_env,
+        num_robots,
+        n_eval_episodes=40,
+        eval_freq=1,
+        deterministic=True,
+    )
 
 
 if __name__ == "__main__":

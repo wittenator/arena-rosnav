@@ -30,6 +30,7 @@ from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
+    MarlEvalCallback,
 )
 from stable_baselines3.common.policies import BasePolicy
 
@@ -108,6 +109,9 @@ def main(args):
         model.learn(
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
+            callback=get_evalcallback(
+                num_robots=args.robots,
+            ),
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")
@@ -121,11 +125,25 @@ def main(args):
     sys.exit()
 
 
+def get_evalcallback(num_robots: int) -> MarlEvalCallback:
+    eval_env = FlatlandPettingZooEnv(
+        num_agents=num_robots,
+        ns="eval_sim",
+        agent_list_fn=instantiate_drl_agents,
+        max_num_moves_per_eps=2000,
+    )
 
+    return MarlEvalCallback(
+        eval_env,
+        num_robots,
+        n_eval_episodes=10,
+        eval_freq=1,
+        deterministic=True,
+    )
 
 
 if __name__ == "__main__":
     set_start_method("fork")
     args, _ = parse_marl_training_args()
-    #rospy.init_node("train_env", disable_signals=False, anonymous=True)
+    # rospy.init_node("train_env", disable_signals=False, anonymous=True)
     main(args)

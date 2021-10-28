@@ -476,7 +476,7 @@ def load_vec_normalize(
                 norm_reward=False,
                 clip_reward=15,
             )
-        return env, eval_env
+    return env, eval_env
 
 
 def choose_agent_model(AGENT_NAME, PATHS, args, env, params):

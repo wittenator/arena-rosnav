@@ -21,15 +21,17 @@ Panels:
         - /Plan Manager1/subgoal1
         - /MARL1
         - /MARL1/robot_11
-        - /MARL1/robot_21
+        - /MARL1/robot_21/my_robot1
+        - /MARL1/robot_21/Goal Pose1
         - /MARL1/robot_31
+        - /MARL1/robot_31/my_robot1
+        - /MARL1/robot_31/Goal Pose1
         - /MARL1/robot_41
         - /MARL1/robot_51
         - /MARL1/robot_61/my_robot1
         - /MARL1/robot_61/Goal Pose1
         - /MARL1/robot_71/my_robot1
         - /MARL1/robot_71/Goal Pose1
-        - /MARL1/robot_81
         - /MARL1/robot_81/my_robot1
         - /MARL1/robot_81/Goal Pose1
       Splitter Ratio: 0.4374079406261444
@@ -1167,9 +1169,21 @@ Visualization Manager:
       Frame Timeout: 15
       Frames:
         All Enabled: false
+        eval_sim_robot1_base_footprint:
+          Value: true
+        eval_sim_robot1_laser_link:
+          Value: true
         eval_sim_robot1_odom:
           Value: true
+        eval_sim_robot2_base_footprint:
+          Value: true
+        eval_sim_robot2_laser_link:
+          Value: true
         eval_sim_robot2_odom:
+          Value: true
+        eval_sim_robot3_base_footprint:
+          Value: true
+        eval_sim_robot3_laser_link:
           Value: true
         eval_sim_robot3_odom:
           Value: true
@@ -1203,51 +1217,15 @@ Visualization Manager:
           Value: true
         sim_1_robot3_odom:
           Value: true
-        sim_1_robot4_base_footprint:
-          Value: true
-        sim_1_robot4_laser_link:
-          Value: true
         sim_1_robot4_odom:
-          Value: true
-        sim_1_robot5_base_footprint:
-          Value: true
-        sim_1_robot5_laser_link:
           Value: true
         sim_1_robot5_odom:
           Value: true
-        sim_1_robot6_base_footprint:
-          Value: true
-        sim_1_robot6_laser_link:
-          Value: true
         sim_1_robot6_odom:
-          Value: true
-        sim_1_robot7_base_footprint:
-          Value: true
-        sim_1_robot7_laser_link:
           Value: true
         sim_1_robot7_odom:
           Value: true
-        sim_1_robot8_base_footprint:
-          Value: true
-        sim_1_robot8_laser_link:
-          Value: true
         sim_1_robot8_odom:
-          Value: true
-        sim_2_robot1_odom:
-          Value: true
-        sim_2_robot2_odom:
-          Value: true
-        sim_2_robot3_odom:
-          Value: true
-        sim_2_robot4_odom:
-          Value: true
-        sim_2_robot5_odom:
-          Value: true
-        sim_2_robot6_odom:
-          Value: true
-        sim_2_robot7_odom:
-          Value: true
-        sim_2_robot8_odom:
           Value: true
       Marker Alpha: 1
       Marker Scale: 1
@@ -1258,11 +1236,17 @@ Visualization Manager:
       Tree:
         map:
           eval_sim_robot1_odom:
-            {}
+            eval_sim_robot1_base_footprint:
+              eval_sim_robot1_laser_link:
+                {}
           eval_sim_robot2_odom:
-            {}
+            eval_sim_robot2_base_footprint:
+              eval_sim_robot2_laser_link:
+                {}
           eval_sim_robot3_odom:
-            {}
+            eval_sim_robot3_base_footprint:
+              eval_sim_robot3_laser_link:
+                {}
           eval_sim_robot4_odom:
             {}
           eval_sim_robot5_odom:
@@ -1286,40 +1270,14 @@ Visualization Manager:
               sim_1_robot3_laser_link:
                 {}
           sim_1_robot4_odom:
-            sim_1_robot4_base_footprint:
-              sim_1_robot4_laser_link:
-                {}
+            {}
           sim_1_robot5_odom:
-            sim_1_robot5_base_footprint:
-              sim_1_robot5_laser_link:
-                {}
+            {}
           sim_1_robot6_odom:
-            sim_1_robot6_base_footprint:
-              sim_1_robot6_laser_link:
-                {}
+            {}
           sim_1_robot7_odom:
-            sim_1_robot7_base_footprint:
-              sim_1_robot7_laser_link:
-                {}
+            {}
           sim_1_robot8_odom:
-            sim_1_robot8_base_footprint:
-              sim_1_robot8_laser_link:
-                {}
-          sim_2_robot1_odom:
-            {}
-          sim_2_robot2_odom:
-            {}
-          sim_2_robot3_odom:
-            {}
-          sim_2_robot4_odom:
-            {}
-          sim_2_robot5_odom:
-            {}
-          sim_2_robot6_odom:
-            {}
-          sim_2_robot7_odom:
-            {}
-          sim_2_robot8_odom:
             {}
       Update Interval: 0
       Value: true
@@ -1329,7 +1287,7 @@ Visualization Manager:
           Displays:
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /sim_1/flatland_server/debug/model/robot1
+              Marker Topic: /eval_sim/flatland_server/debug/model/robot1
               Name: my_robot
               Namespaces:
                 "": true
@@ -1348,7 +1306,7 @@ Visualization Manager:
               Shaft Length: 0.5
               Shaft Radius: 0.029999999329447746
               Shape: Arrow
-              Topic: /sim_1/robot1/goal
+              Topic: /eval_sim/robot1/goal
               Unreliable: false
               Value: true
           Enabled: true
@@ -1357,7 +1315,7 @@ Visualization Manager:
           Displays:
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /sim_1/flatland_server/debug/model/robot2
+              Marker Topic: /eval_sim/flatland_server/debug/model/robot2
               Name: my_robot
               Namespaces:
                 "": true
@@ -1376,7 +1334,7 @@ Visualization Manager:
               Shaft Length: 0.5
               Shaft Radius: 0.029999999329447746
               Shape: Arrow
-              Topic: /sim_1/robot2/goal
+              Topic: /eval_sim/robot2/goal
               Unreliable: false
               Value: true
           Enabled: true
@@ -1385,7 +1343,7 @@ Visualization Manager:
           Displays:
             - Class: rviz/MarkerArray
               Enabled: true
-              Marker Topic: /sim_1/flatland_server/debug/model/robot3
+              Marker Topic: /eval_sim/flatland_server/debug/model/robot3
               Name: my_robot
               Namespaces:
                 "": true
@@ -1404,7 +1362,7 @@ Visualization Manager:
               Shaft Length: 0.5
               Shaft Radius: 0.029999999329447746
               Shape: Arrow
-              Topic: /sim_1/robot3/goal
+              Topic: /eval_sim/robot3/goal
               Unreliable: false
               Value: true
           Enabled: true
@@ -1416,7 +1374,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot4
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1444,7 +1402,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot5
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1500,7 +1458,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot7
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1528,7 +1486,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot8
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1556,7 +1514,7 @@ Visualization Manager:
               Marker Topic: /sim_1/flatland_server/debug/model/robot4
               Name: my_robot
               Namespaces:
-                "": true
+                {}
               Queue Size: 100
               Value: true
             - Alpha: 1
@@ -1619,10 +1577,10 @@ Visualization Manager:
       Invert Z Axis: false
       Name: Current View
       Near Clip Distance: 0.009999999776482582
-      Scale: 41.73602294921875
+      Scale: 38.79127883911133
       Target Frame: <Fixed Frame>
-      X: 1.4056235551834106
-      Y: -1.0405430793762207
+      X: 2.8734543323516846
+      Y: -0.42915862798690796
     Saved: ~
 Window Geometry:
   Displays:

@@ -17,7 +17,7 @@
     "goal_radius": 0.25,
     "reward_fnc": "rule_02",
     "discrete_action_space": false,
-    "normalize": true,
+    "normalize": false,
     "task_mode": "staged",
     "curr_stage": 1
 }
