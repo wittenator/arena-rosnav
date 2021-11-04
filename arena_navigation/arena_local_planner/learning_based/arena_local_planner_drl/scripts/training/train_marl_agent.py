@@ -26,7 +26,11 @@ from tools.train_agent_utils import (
 import os, sys, rospy, time
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.vec_env import (
+    SubprocVecEnv,
+    DummyVecEnv,
+    VecNormalize,
+)
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
@@ -99,6 +103,16 @@ def main(args):
         num_cpus=cpu_count() - 1,
         num_vec_envs=args.n_envs,
     )
+
+    env = VecNormalize(
+        env,
+        training=True,
+        norm_obs=True,
+        norm_reward=True,
+        clip_reward=15,
+        clip_obs=3.5,
+    )
+
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
     # set num of timesteps to be generated
@@ -110,6 +124,7 @@ def main(args):
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
             callback=get_evalcallback(
+                env,
                 num_robots=args.robots,
             ),
         )
@@ -125,19 +140,29 @@ def main(args):
     sys.exit()
 
 
-def get_evalcallback(num_robots: int) -> MarlEvalCallback:
-    eval_env = FlatlandPettingZooEnv(
+def get_evalcallback(train_env, num_robots: int) -> MarlEvalCallback:
+    eval_env = env_fn(
         num_agents=num_robots,
         ns="eval_sim",
         agent_list_fn=instantiate_drl_agents,
-        max_num_moves_per_eps=2000,
+        max_num_moves_per_eps=700,
+    )
+
+    eval_env = VecNormalize(
+        eval_env,
+        training=False,
+        norm_obs=True,
+        norm_reward=False,
+        clip_reward=15,
+        clip_obs=3.5,
     )
 
     return MarlEvalCallback(
+        train_env,
         eval_env,
         num_robots,
-        n_eval_episodes=10,
-        eval_freq=1,
+        n_eval_episodes=5,
+        eval_freq=10,
         deterministic=True,
     )
 
