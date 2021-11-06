@@ -53,7 +53,7 @@ sudo aptitude update && sudo aptitude -y install \
 libopencv-dev \
 liblua5.2-dev \
 screen \
-python3-rospkg-modules \
+python3-rospkg \
 ros-${ROS_NAME_VERSION}-navigation \
 ros-${ROS_NAME_VERSION}-teb-local-planner \
 ros-${ROS_NAME_VERSION}-mpc-local-planner \
