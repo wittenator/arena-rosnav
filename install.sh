@@ -45,7 +45,7 @@ sudo aptitude -y install ros-${ROS_NAME_VERSION}-desktop-full
 echo "source /opt/ros/${ROS_NAME_VERSION}/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
 
-apt-get remove python-ros* python-catkin*
+sudo aptitude remove python-ros* python-catkin*
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 sudo rosdep init
 rosdep update
