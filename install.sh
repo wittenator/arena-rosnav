@@ -45,8 +45,13 @@ sudo aptitude -y install ros-${ROS_NAME_VERSION}-desktop-full
 echo "source /opt/ros/${ROS_NAME_VERSION}/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
 
-sudo aptitude remove python-ros* python-catkin*
-sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
+if [ $ROS_NAME_VERSION = "noetic" ]; then
+  sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
+else
+  sudo aptitude -y install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+fi
+
+
 sudo rosdep init
 rosdep update
 
@@ -54,7 +59,7 @@ sudo aptitude update && sudo aptitude -y install \
 libopencv-dev \
 liblua5.2-dev \
 screen \
-python3-rospkg \
+python3-rospkg-modules \
 ros-${ROS_NAME_VERSION}-navigation \
 ros-${ROS_NAME_VERSION}-teb-local-planner \
 ros-${ROS_NAME_VERSION}-mpc-local-planner \
