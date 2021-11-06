@@ -48,7 +48,7 @@ source ~/.${CURSHELL}rc
 if [ $ROS_NAME_VERSION = "noetic" ]; then
   sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
 else
-  sudo aptitude -y install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential
+  sudo aptitude -y install python-rosdep python-rosinstall python-rosinstall-generator python-wstool build-essential python3.8-dev
 fi
 
 
