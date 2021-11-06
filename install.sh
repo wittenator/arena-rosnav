@@ -1,5 +1,20 @@
 #!/bin/bash
 
+case $(lsb_release -sc) in
+  focal)
+    ROS_VERSION=noetic
+    ;;
+  
+  bionic)
+    ROS_VERSION=melodic
+    ;;
+
+  *)
+    echo "Currently only Ubuntu Bionic Beaver and Focal Fossa are supported for an automatic install. Please refer to the manual installation if you use any Linux release or version."
+    exit 1
+    ;;
+esac
+
 if test -n "$ZSH_VERSION"; then
   CURSHELL=zsh
 elif test -n "$BASH_VERSION"; then
@@ -24,9 +39,9 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main
 sudo apt-key adv --keyserver 'hkp://keyserver.ubuntu.com:80' --recv-key C1CF6E31E6BADE8868B172B4F42ED6FBAB17C654
 
 sudo aptitude update
-sudo aptitude -y install ros-noetic-desktop-full
+sudo aptitude -y install ros-${ROS_VERSION}-desktop-full
 
-echo "source /opt/ros/noetic/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
+echo "source /opt/ros/${ROS_VERSION}/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
@@ -38,21 +53,26 @@ libopencv-dev \
 liblua5.2-dev \
 screen \
 python3-rospkg-modules \
-ros-noetic-navigation \
-ros-noetic-teb-local-planner \
-ros-noetic-mpc-local-planner \
+ros-${ROS_VERSION}-navigation \
+ros-${ROS_VERSION}-teb-local-planner \
+ros-${ROS_VERSION}-mpc-local-planner \
 libarmadillo-dev \
-ros-noetic-nlopt \
-ros-noetic-geometry2
+ros-${ROS_VERSION}-nlopt \
 
 poetry install
+
+if [ $ROS_VERSION = "noetic" ]; then
+  sudo aptitude -y install ros-noetic-geometry2
+else
+  poetry run . ./geometry2_install.sh
+fi
 
 rosws update
 
 echo "export PYTHONPATH=${PWD}:${PWD}/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
 source ~/.${CURSHELL}rc
-poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release
+poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${poetry env info -p}
 
 echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
