@@ -72,7 +72,7 @@ rosws update
 echo "export PYTHONPATH=${PWD}:${PWD}/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
 source ~/.${CURSHELL}rc
-poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${poetry env info -p}
+poetry run catkin_make -C ../.. -DCMAKE_BUILD_TYPE=Release -DPYTHON_EXECUTABLE=${poetry env info -p}/bin/python3
 
 echo "source $(readlink -f ${PWD}/../../devel/setup.sh)" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
