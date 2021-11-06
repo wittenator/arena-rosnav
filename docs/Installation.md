@@ -4,7 +4,7 @@
 
 ##### Prerequisites
 
-In order to use the install script you need to have Python >=3.8, [Poetry](https://python-poetry.org/docs/), curl and git  installed and available in your shell.
+In order to use the install script you need to have Python >=3.8, [Poetry](https://python-poetry.org/docs/) and the correct `python3-dev` package  installed and available in your shell.
 
 #### Installation
 
