@@ -2,11 +2,11 @@
 
 case $(lsb_release -sc) in
   focal)
-    ROS_VERSION=noetic
+    ROS_NAME_VERSION=noetic
     ;;
   
   bionic)
-    ROS_VERSION=melodic
+    ROS_NAME_VERSION=melodic
     ;;
 
   *)
@@ -39,9 +39,9 @@ sudo sh -c 'echo "deb http://packages.ros.org/ros/ubuntu $(lsb_release -sc) main
 curl -s https://raw.githubusercontent.com/ros/rosdistro/master/ros.asc | sudo apt-key add -
 
 sudo aptitude update
-sudo aptitude -y install ros-${ROS_VERSION}-desktop-full
+sudo aptitude -y install ros-${ROS_NAME_VERSION}-desktop-full
 
-echo "source /opt/ros/${ROS_VERSION}/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
+echo "source /opt/ros/${ROS_NAME_VERSION}/setup.${CURSHELL}" >> ~/.${CURSHELL}rc
 source ~/.${CURSHELL}rc
 
 sudo aptitude -y install python3-rosdep python3-rosinstall python3-rosinstall-generator python3-wstool build-essential
@@ -53,15 +53,15 @@ libopencv-dev \
 liblua5.2-dev \
 screen \
 python3-rospkg-modules \
-ros-${ROS_VERSION}-navigation \
-ros-${ROS_VERSION}-teb-local-planner \
-ros-${ROS_VERSION}-mpc-local-planner \
+ros-${ROS_NAME_VERSION}-navigation \
+ros-${ROS_NAME_VERSION}-teb-local-planner \
+ros-${ROS_NAME_VERSION}-mpc-local-planner \
 libarmadillo-dev \
-ros-${ROS_VERSION}-nlopt \
+ros-${ROS_NAME_VERSION}-nlopt \
 
 poetry install
 
-if [ $ROS_VERSION = "noetic" ]; then
+if [ $ROS_NAME_VERSION = "noetic" ]; then
   sudo aptitude -y install ros-noetic-geometry2
 else
   poetry run . ./geometry2_install.sh
