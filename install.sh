@@ -86,17 +86,15 @@ PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpyth
       echo "Can't find python library please install it with \" sudo apt-get python3-dev \" !" >&2
   fi
 
-  cd ../forks/geometry2_ws/
-
   # compile geometry2 with python3 
   echo -n "compiling geometry2 with python3 ..."
-  catkin_make -D  -DPYTHON_EXECUTABLE=${PYTHON3_EXEC} -DPYTHON_INCLUDE_DIR=${PYTHON3_INCLUDE} -DPYTHON_LIBRARY=${PYTHON3_DLIB}
+  poetry run catkin_make -C ../forks/geometry2_ws/ -D  -DPYTHON_EXECUTABLE=${PYTHON3_EXEC} -DPYTHON_INCLUDE_DIR=${PYTHON3_INCLUDE} -DPYTHON_LIBRARY=${PYTHON3_DLIB}
 
 
   # add the lib path to the python environment 
   if [ $? -eq 0 ] ; then
       echo " done!"
-      rc_info="export PYTHONPATH=$(readlink -f ${PWD}/../../../devel/lib/python3/dist-packages):\${PYTHONPATH}\n"
+      rc_info="export PYTHONPATH=$(readlink -f ${PWD}/../../devel/lib/python3/dist-packages):\${PYTHONPATH}\n"
       echo -e "$rc_info" >> ~/.${CURSHELL}rc
   else
       echo "Fail to compile geometry2"
