@@ -70,7 +70,9 @@ ros-${ROS_NAME_VERSION}-navigation \
 ros-${ROS_NAME_VERSION}-teb-local-planner \
 ros-${ROS_NAME_VERSION}-mpc-local-planner \
 libarmadillo-dev \
-ros-${ROS_NAME_VERSION}-nlopt \
+ros-${ROS_NAME_VERSION}-nlopt
+
+rosws update
 
 poetry install
 
@@ -110,8 +112,6 @@ PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpyth
   else
       echo "Fail to compile geometry2"
   fi
-
-rosws update
 
 echo "export PYTHONPATH=${PWD}:${PWD}/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
