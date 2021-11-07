@@ -77,27 +77,24 @@ poetry install
 if [ $ROS_NAME_VERSION = "noetic" ]; then
   sudo aptitude -y install ros-noetic-geometry2
 else
-  poetry run PYTHON3_EXEC="$(which python3)"
-  poetry run PYTHON3_INCLUDE="$(ls -d /usr/include/* | grep  python | sort -r| head -1)"
-  poetry run PYTHON3_DLIB="$(ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpython3\S*.so"| sort | head -1)"
+PYTHON3_EXEC=$(poetry env info -p)/bin/python3
+PYTHON3_INCLUDE="$(poetry run ls -d /usr/include/* | grep  python | sort -r| head -1)"
+PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpython3\S*.so"| sort | head -1)"
   if [ -z $PYTHON3_DLIB ] || [ -z $PYTHON3_INCLUDE ] || [ -z $PYTHON3_EXEC ] ; then
       echo "Can't find python library please install it with \" sudo apt-get python3-dev \" !" >&2
   fi
 
-  PARENT_DIR_WS="$(cd "$(dirname $0)/../../.." >/dev/null 2>&1 && pwd)"
-  mkdir -p ${PARENT_DIR_WS}/geometry2_ws/src && cd "$_"
-  git clone --depth=1 https://github.com/ros/geometry2.git
-  cd ..
+  cd ../forks/geometry2_ws
 
   # compile geometry2 with python3 
   echo -n "compiling geometry2 with python3 ..."
-  catkin_make -DPYTHON_EXECUTABLE=${PYTHON3_EXEC} -DPYTHON_INCLUDE_DIR=${PYTHON3_INCLUDE} -DPYTHON_LIBRARY=${PYTHON3_DLIB} > /dev/null 2>&1
+  catkin_make -D  -DPYTHON_EXECUTABLE=${PYTHON3_EXEC} -DPYTHON_INCLUDE_DIR=${PYTHON3_INCLUDE} -DPYTHON_LIBRARY=${PYTHON3_DLIB}
 
 
   # add the lib path to the python environment 
   if [ $? -eq 0 ] ; then
       echo " done!"
-      package_path="$(cd devel/lib/python3/dist-packages && pwd)"
+      package_path="$(cd ../../../devel/lib/python3/dist-packages && pwd)"
       rc_info="export PYTHONPATH=${package_path}:\${PYTHONPATH}\n"
       if echo $SHELL | grep zsh > /dev/null
       then
@@ -113,7 +110,6 @@ else
   else
       echo "Fail to compile geometry2"
   fi
-fi
 
 rosws update
 
