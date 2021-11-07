@@ -26,7 +26,7 @@ PyQt5 = "^5.15.4"
 scipy = "^1.7.1"
 PettingZoo = "1.13.1"
 SuperSuit = "^3.3.0"
-stable-baselines3 = {git = "https://github.com/ignc-research/stable-baselines3"}
+stable-baselines3 = {git = "https://github.com/ignc-research/stable-baselines3", rev = "marl"}
 
 [tool.poetry.dev-dependencies]
 
