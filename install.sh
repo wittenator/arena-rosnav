@@ -86,7 +86,7 @@ PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpyth
       echo "Can't find python library please install it with \" sudo apt-get python3-dev \" !" >&2
   fi
 
-  cd ../forks/geometry2_ws
+  cd ../forks/geometry2
 
   # compile geometry2 with python3 
   echo -n "compiling geometry2 with python3 ..."
@@ -112,6 +112,7 @@ PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpyth
   else
       echo "Fail to compile geometry2"
   fi
+fi
 
 echo "export PYTHONPATH=${PWD}:${PWD}/arena_navigation/arena_local_planner/learning_based/arena_local_planner_drl:\$PYTHONPATH" >> ~/.${CURSHELL}rc
 
