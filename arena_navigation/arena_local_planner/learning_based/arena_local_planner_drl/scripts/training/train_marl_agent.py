@@ -109,9 +109,6 @@ def main(args):
         model.learn(
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
-            callback=get_evalcallback(
-                num_robots=args.robots,
-            ),
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")

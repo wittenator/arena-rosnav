@@ -14,6 +14,8 @@ from task_generator.marl_tasks import get_MARL_task
 
 from flatland_msgs.srv import StepWorld, StepWorldRequest
 
+from rl_agent.utils.supersuit_utils import MarkovVectorEnv_patched
+
 
 def env_fn(**kwargs: dict) -> VecEnv:
     """
@@ -24,10 +26,11 @@ def env_fn(**kwargs: dict) -> VecEnv:
     elsewhere in the developer documentation.
     """
     env = FlatlandPettingZooEnv(**kwargs)
+    env = from_parallel(env)
     env = ss.pad_action_space_v0(env)
     env = ss.pad_observations_v0(env)
-    env = ss.black_death_v2(env)
-    env = ss.pettingzoo_env_to_vec_env_v0(env)
+    env = to_parallel(env)
+    env = MarkovVectorEnv_patched(env, black_death=True)
     return env
 
 
