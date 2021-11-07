@@ -31,6 +31,12 @@ mkdir -p catkin_ws/src && cd catkin_ws/src
 git clone --depth 1 --branch MARL_noetic https://github.com/wittenator/arena-rosnav.git
 cd arena-rosnav
 
+if [ $ROS_NAME_VERSION = "noetic" ]; then
+  mv .rosinstall.noetic .rosinstall
+else
+  mv .rosinstall.melodic .rosinstall
+fi
+
 sudo add-apt-repository universe
 sudo add-apt-repository multiverse
 sudo add-apt-repository restricted
