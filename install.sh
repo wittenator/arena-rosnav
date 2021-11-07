@@ -89,7 +89,7 @@ PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpyth
   # compile geometry2 with python3 
   echo -n "compiling geometry2 with python3 ..."
   poetry run catkin_make -C ../forks/geometry2_ws/ -D  -DPYTHON_EXECUTABLE=${PYTHON3_EXEC} -DPYTHON_INCLUDE_DIR=${PYTHON3_INCLUDE} -DPYTHON_LIBRARY=${PYTHON3_DLIB}
-
+  echo $PWD
 
   # add the lib path to the python environment 
   if [ $? -eq 0 ] ; then
