@@ -86,7 +86,7 @@ PYTHON3_DLIB="$(poetry run ls -d /usr/lib/x86_64-linux-gnu/* | grep -P  "libpyth
       echo "Can't find python library please install it with \" sudo apt-get python3-dev \" !" >&2
   fi
 
-  cd ../forks/geometry2
+  cd ../forks/geometry2_ws/
 
   # compile geometry2 with python3 
   echo -n "compiling geometry2 with python3 ..."
