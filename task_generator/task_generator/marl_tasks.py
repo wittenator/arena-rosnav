@@ -247,7 +247,24 @@ def get_MARL_task(
     robot_names: List[str],
     start_stage: int = 1,
     PATHS: dict = None,
-) -> Type[ABSMARLTask]:
+) -> ABSMARLTask:
+    """Function to return desired navigation task manager.
+
+    Args:
+        ns (str): Environments' ROS namespace. There should only be one env per ns.
+        mode (str): avigation task mode for the agents. Modes to chose from: ['random', 'staged']. \
+            Defaults to "random".
+        robot_names (List[str]): List containing all robots' names in order to address the right namespaces.
+        start_stage (int, optional): Starting difficulty level for the learning curriculum. Defaults to 1.
+        PATHS (dict, optional): Dictionary containing program related paths. Defaults to None.
+
+    Raises:
+        NotImplementedError: The manual task mode is currently not implemented.
+        NotImplementedError: The scenario task mode is currently not implemented.
+
+    Returns:
+        ABSMARLTask: A task manager instance.
+    """
     assert type(robot_names) is list
 
     task_mode = get_mode(mode)

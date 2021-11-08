@@ -148,7 +148,9 @@ class ObservationCollector:
         return merged_obs, obs_dict
 
     @staticmethod
-    def _get_goal_pose_in_robot_frame(goal_pos: Pose2D, robot_pos: Pose2D):
+    def _get_goal_pose_in_robot_frame(
+        goal_pos: Pose2D, robot_pos: Pose2D
+    ) -> Tuple[float, float]:
         y_relative = goal_pos.y - robot_pos.y
         x_relative = goal_pos.x - robot_pos.x
         rho = (x_relative ** 2 + y_relative ** 2) ** 0.5
