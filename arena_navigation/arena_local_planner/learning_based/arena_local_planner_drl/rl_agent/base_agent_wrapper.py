@@ -41,22 +41,20 @@ class BaseDRLAgent(ABC):
         robot_name: str = None,
         hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
         action_space_path: str = DEFAULT_ACTION_SPACE,
+        robot_safe_dist: float = 0.5,
         *args,
         **kwargs,
     ) -> None:
-        """[summary]
+        """Base agent class for an DRL agent.
 
         Args:
-            ns (str, optional):
-                Agent name (directory has to be of the same name). Defaults to None.
-            robot_name (str, optional):
-                Robot specific ROS namespace extension. Defaults to None.
-            hyperparameter_path (str, optional):
-                Path to json file containing defined hyperparameters.
+            ns (str, optional): Agent name (directory has to be of the same name). Defaults to None.
+            robot_name (str, optional): Robot specific ROS namespace extension. Defaults to None.
+            hyperparameter_path (str, optional): Path to json file containing defined hyperparameters. \
                 Defaults to DEFAULT_HYPERPARAMETER.
-            action_space_path (str, optional):
-                Path to yaml file containing action space settings.
+            action_space_path (str, optional): Path to yaml file containing action space settings.\
                 Defaults to DEFAULT_ACTION_SPACE.
+            robot_safe_dist (float, optional): Robots' safe distance in meters. Defaults to 0.5.
         """
         self._is_train_mode = rospy.get_param("/train_mode")
 
@@ -64,8 +62,8 @@ class BaseDRLAgent(ABC):
         self._ns_robot = (
             self._ns if robot_name is None else self._ns + robot_name + "/"
         )
-        self._robot_sim_ns = robot_name
-        print(robot_name)
+        self._robot_sim_ns, self._safe_dist = robot_name, robot_safe_dist
+        # print(robot_name)
 
         self.load_hyperparameters(path=hyperparameter_path)
         robot_setting_path = os.path.join(
@@ -234,7 +232,7 @@ class BaseDRLAgent(ABC):
         assert self._agent_params and "reward_fnc" in self._agent_params
         self.reward_calculator = RewardCalculator(
             robot_radius=self._robot_radius,
-            safe_dist=self._robot_radius + 0.3,
+            safe_dist=self._safe_dist,
             goal_radius=GOAL_RADIUS,
             rule=self._agent_params["reward_fnc"],
             extended_eval=False,
@@ -279,8 +277,7 @@ class BaseDRLAgent(ABC):
             and integral part in order to map right actions.\
 
         Args:
-            merged_obs (np.ndarray):
-                observation data concatenated into one array.
+            merged_obs (np.ndarray): Observation data concatenated into one array.
 
         Returns:
             np.ndarray: Normalized observations array.
@@ -296,10 +293,8 @@ class BaseDRLAgent(ABC):
         """Infers an action based on the given observation.
 
         Args:
-            obs (np.ndarray):
-                Merged observation array.
-            obs_normalized (bool):
-                Whether the obs array is already normalized.
+            obs (np.ndarray): Merged observation array.
+            obs_normalized (bool): Whether the obs array is already normalized. \
                 Defaults to False.
 
         Returns:
@@ -325,11 +320,8 @@ class BaseDRLAgent(ABC):
         """Calculates the reward based on the parsed observation
 
         Args:
-            action (np.ndarray):
-                Velocity commands of the agent\
-                in [linear velocity, angular velocity].
-            obs_dict (dict):
-                Observation dictionary where each key makes up a different \
+            action (np.ndarray): Velocity commands of the agent in [linear velocity, angular velocity].
+            obs_dict (dict): Observation dictionary where each key makes up a different \
                 kind of information about the environment.
         Returns:
             float: Reward amount
@@ -344,8 +336,7 @@ class BaseDRLAgent(ABC):
         """Publishes an action on 'self._action_pub' (ROS topic).
 
         Args:
-            action (np.ndarray):
-                Action in [linear velocity, angular velocity]
+            action (np.ndarray): Action in [linear velocity, angular velocity]
         """
         if not action:
             action = [0, 0]

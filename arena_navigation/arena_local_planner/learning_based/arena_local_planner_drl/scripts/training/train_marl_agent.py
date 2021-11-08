@@ -14,7 +14,10 @@ from stable_baselines3 import PPO
 from supersuit.vector import MakeCPUAsyncConstructor, ConcatVecEnv
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
-from rl_agent.utils.supersuit_utils import vec_env_create, MarkovVectorEnv_patched
+from rl_agent.utils.supersuit_utils import (
+    vec_env_create,
+    MarkovVectorEnv_patched,
+)
 from tools.argsparser import parse_marl_training_args
 from tools.staged_train_callback import InitiateNewTrainStage
 from tools.train_agent_utils import (
@@ -27,7 +30,11 @@ from tools.train_agent_utils import (
 import os, sys, rospy, time
 
 from stable_baselines3 import PPO
-from stable_baselines3.common.vec_env import SubprocVecEnv, DummyVecEnv
+from stable_baselines3.common.vec_env import (
+    SubprocVecEnv,
+    DummyVecEnv,
+    VecNormalize,
+)
 from stable_baselines3.common.callbacks import (
     EvalCallback,
     StopTrainingOnRewardThreshold,
@@ -120,6 +127,7 @@ def main(args):
         clip_reward=15,
         clip_obs=3.5,
     )
+
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
     # set num of timesteps to be generated
