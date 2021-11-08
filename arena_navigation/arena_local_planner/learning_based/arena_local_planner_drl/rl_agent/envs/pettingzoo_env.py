@@ -238,9 +238,9 @@ class FlatlandPettingZooEnv(ParallelEnv):
                 self.terminal_observation[agent] = merged_obs[agent]
             if agent not in self.agents:
                 infos[agent] = {}
-                infos[agent]["terminal_observation"] = self.terminal_observation[agent]
-
-
+                infos[agent][
+                    "terminal_observation"
+                ] = self.terminal_observation[agent]
 
         return merged_obs, rewards, dones, infos
 

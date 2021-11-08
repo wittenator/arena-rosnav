@@ -141,7 +141,7 @@ def main(args):
             callback=get_evalcallback(
                 train_env=env,
                 num_robots=args.robots,
-            )
+            ),
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")
