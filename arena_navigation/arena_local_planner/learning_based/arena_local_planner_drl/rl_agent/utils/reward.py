@@ -320,11 +320,12 @@ class RewardCalculator:
     def _reward_safe_dist(
         self, laser_scan: np.ndarray, punishment: float = 0.15
     ):
-        """
-        Reward for undercutting safe distance.
+        """Reward for undercutting safe distance.
 
-        :param laser_scan (np.ndarray): laser scan data
-        :param punishment (float, optional): punishment for undercutting. defaults to 0.15
+        Args:
+            laser_scan (np.ndarray): 2D laser scan data.
+            punishment (float, optional): Punishment amount. Could be applied in consecutive timesteps. \
+                Defaults to 0.15.
         """
         if laser_scan.min() < self.safe_dist:
             self.curr_reward -= punishment
@@ -335,12 +336,15 @@ class RewardCalculator:
     def _reward_not_moving(
         self, action: np.ndarray = None, punishment: float = 0.01
     ):
-        """
-        Reward for not moving. Only applies half of the punishment amount
-        when angular velocity is larger than zero.
+        """Reward for not moving. 
 
-        :param action (np.ndarray (,2)): [0] - linear velocity, [1] - angular velocity
-        :param punishment (float, optional): punishment for not moving. defaults to 0.01
+        Args:
+            action (np.ndarray, optional): Array of shape (2,). First entry, linear velocity. \
+                Second entry, angular velocity. Defaults to None.
+            punishment (float, optional): Punishment for not moving. Defaults to 0.01.
+            
+        Note:
+            Only applies half of the punishment amount when angular velocity is larger than zero.
         """
         if action is not None and action[0] == 0.0:
             self.curr_reward -= (
@@ -353,12 +357,13 @@ class RewardCalculator:
         punishment: float = 0.01,
         consumption_factor: float = 0.005,
     ):
-        """
-        Reward for driving a certain distance. Supposed to represent "fuel consumption".
+        """Reward for driving a certain distance. Supposed to represent "fuel consumption".
 
-        :param action (np.ndarray (,2)): [0] - linear velocity, [1] - angular velocity
-        :param punishment (float, optional): punishment when action can't be retrieved. defaults to 0.01
-        :param consumption_factor (float, optional): weighted velocity punishment. defaults to 0.01
+        Args:
+            action (np.array, optional): Array of shape (2,). First entry, linear velocity. \
+                Second entry, angular velocity. Defaults to None.
+            punishment (float, optional): Punishment when action can't be retrieved. Defaults to 0.01.
+            consumption_factor (float, optional): Factor for the weighted velocity punishment. Defaults to 0.005.
         """
         if action is None:
             self.curr_reward -= punishment
@@ -375,14 +380,18 @@ class RewardCalculator:
         reward_factor: float = 0.1,
         penalty_factor: float = 0.15,
     ):
-        """
-        Reward for approaching/veering away the global plan. (Weighted difference between
-        prior distance to global plan and current distance to global plan)
+        """Reward for approaching/veering away the global plan.
 
-        :param global_plan: (np.ndarray): vector containing poses on global plan
-        :param robot_pose (Pose2D): robot position
-        :param reward_factor (float, optional): positive factor when approaching global plan. defaults to 0.1
-        :param penalty_factor (float, optional): negative factor when veering away from global plan. defaults to 0.15
+        Description:
+            Weighted difference between prior distance to global plan and current distance to global plan.
+
+        Args:
+            global_plan (np.array): Array containing 2D poses.
+            robot_pose (Pose2D): Robot position.
+            reward_factor (float, optional): Factor to be multiplied when the difference between current \
+                distance to global plan and the previous one is positive. Defaults to 0.1.
+            penalty_factor (float, optional): Factor to be multiplied when the difference between current \
+                distance to global plan and the previous one is negative. Defaults to 0.15.
         """
         if global_plan is not None and len(global_plan) != 0:
             curr_dist_to_path, idx = self.get_min_dist2global_kdtree(
@@ -407,13 +416,14 @@ class RewardCalculator:
         action: np.array = None,
         dist_to_path: float = 0.5,
     ):
-        """
-        Reward for travelling on the global plan.
+        """Reward for travelling along the global plan.
 
-        :param global_plan: (np.ndarray): vector containing poses on global plan
-        :param robot_pose (Pose2D): robot position
-        :param action (np.ndarray (,2)): [0] = linear velocity, [1] = angular velocity
-        :param dist_to_path (float, optional): applies reward within this distance
+        Args:
+            global_plan (np.array): Array containing 2D poses.
+            robot_pose (Pose2D): Robot position.
+            action (np.array, optional): action (np.ndarray, optional): Array of shape (2,). First entry, linear velocity. \
+                Second entry, angular velocity. Defaults to None.
+            dist_to_path (float, optional): Minimum distance to the global path. Defaults to 0.5.
         """
         if (
             global_plan is not None
@@ -429,12 +439,15 @@ class RewardCalculator:
 
     def get_min_dist2global_kdtree(
         self, global_plan: np.array, robot_pose: Pose2D
-    ):
-        """
-        Calculates minimal distance to global plan using kd tree search.
+    ) -> Tuple[float, int]:
+        """Calculates minimal distance to global plan using kd-tree-search.
 
-        :param global_plan: (np.ndarray): vector containing poses on global plan
-        :param robot_pose (Pose2D): robot position
+        Args:
+            global_plan (np.array): Array containing 2D poses.
+            robot_pose (Pose2D): Robot position.
+
+        Returns:
+            Tuple[float, int]: Distance to the closes pose and index of the closes pose.
         """
         if self.kdtree is None:
             self.kdtree = scipy.spatial.cKDTree(global_plan)
@@ -443,10 +456,11 @@ class RewardCalculator:
         return dist, index
 
     def _reward_abrupt_direction_change(self, action: np.array = None):
-        """
-        Applies a penalty when an abrupt change of direction occured.
+        """Applies a penalty when an abrupt change of direction occured.
 
-        :param action: (np.ndarray (,2)): [0] = linear velocity, [1] = angular velocity
+        Args:
+            action (np.array, optional): Array of shape (2,). First entry, linear velocity. \
+                Second entry, angular velocity. Defaults to None.
         """
         if self.last_action is not None:
             curr_ang_vel = action[1]
