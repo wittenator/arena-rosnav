@@ -234,10 +234,16 @@ class FlatlandPettingZooEnv(ParallelEnv):
         self.agents = [agent for agent in self.agents if not dones[agent]]
 
         for agent in self.possible_agents:
+            # agent is done in this episode
             if agent in dones and dones[agent]:
                 self.terminal_observation[agent] = merged_obs[agent]
-            if agent not in self.agents:
-                infos[agent] = {}
+                infos[agent][
+                    "terminal_observation"
+                ] = merged_obs[agent]
+            # agent is done since atleast last episode
+            elif agent not in self.agents:
+                if agent not in infos:
+                    infos[agent] = {}
                 infos[agent][
                     "terminal_observation"
                 ] = self.terminal_observation[agent]
