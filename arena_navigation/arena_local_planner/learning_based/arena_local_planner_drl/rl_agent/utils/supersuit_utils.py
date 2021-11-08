@@ -3,6 +3,7 @@ from typing import Callable
 
 import numpy as np
 import rospy
+from stable_baselines3.common.vec_env import VecNormalize
 from supersuit.vector import ConcatVecEnv, MarkovVectorEnv
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 

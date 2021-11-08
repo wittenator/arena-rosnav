@@ -16,6 +16,7 @@ from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
 from rl_agent.utils.supersuit_utils import vec_env_create, MarkovVectorEnv_patched
 from tools.argsparser import parse_marl_training_args
+from tools.staged_train_callback import InitiateNewTrainStage
 from tools.train_agent_utils import (
     get_agent_name,
     get_paths,
@@ -92,12 +93,32 @@ def main(args):
         n_envs=args.n_envs,
     )
 
+    # threshold settings for training curriculum
+    # type can be either 'succ' or 'rew'
+    trainstage_cb = InitiateNewTrainStage(
+        n_envs=args.n_envs,
+        treshhold_type="succ",
+        upper_threshold=0.85,
+        lower_threshold=0.6,
+        task_mode=params["task_mode"],
+        verbose=1,
+    )
+
     env = vec_env_create(
         env_fn,
         instantiate_drl_agents,
         num_robots=args.robots,
         num_cpus=cpu_count() - 1,
         num_vec_envs=args.n_envs,
+    )
+
+    env = VecNormalize(
+        env,
+        training=True,
+        norm_obs=True,
+        norm_reward=True,
+        clip_reward=15,
+        clip_obs=3.5,
     )
     model = choose_agent_model(AGENT_NAME, PATHS, args, env, params)
 
@@ -110,9 +131,9 @@ def main(args):
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
             callback=get_evalcallback(
-                env=env,
+                train_env=env,
                 num_robots=args.robots,
-            ),
+            )
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")
@@ -126,21 +147,33 @@ def main(args):
     sys.exit()
 
 
-def get_evalcallback(num_robots: int, env: VecEnv) -> MarlEvalCallback:
-    eval_env = MarkovVectorEnv_patched(FlatlandPettingZooEnv(
+def get_evalcallback(train_env: VecEnv, num_robots: int) -> MarlEvalCallback:
+    eval_env = env_fn(
         num_agents=num_robots,
         ns="eval_sim",
         agent_list_fn=instantiate_drl_agents,
-        max_num_moves_per_eps=2000,
-    ), black_death=True)
+        max_num_moves_per_eps=700,
+    )
+
+    eval_env = VecNormalize(
+        eval_env,
+        training=False,
+        norm_obs=True,
+        norm_reward=False,
+        clip_reward=15,
+        clip_obs=3.5,
+    )
 
     return MarlEvalCallback(
-        train_env=None,
+        train_env=train_env,
         eval_env=eval_env,
         num_robots=num_robots,
-        n_eval_episodes=10,
-        eval_freq=1,
+        n_eval_episodes=5,
+        eval_freq=10000,
         deterministic=True,
+        callback_on_new_best=StopTrainingOnRewardThreshold(
+            treshhold_type="succ", threshold=0.9, verbose=1
+        )
     )
 
 

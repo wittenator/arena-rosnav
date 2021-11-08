@@ -79,7 +79,7 @@ def main(args):
 
     # stop training on reward threshold callback
     stoptraining_cb = StopTrainingOnRewardThreshold(
-        reward_threshold=0.9, verbose=1
+        treshhold_type="succ", threshold=0.9, verbose=1
     )
 
     # instantiate eval environment

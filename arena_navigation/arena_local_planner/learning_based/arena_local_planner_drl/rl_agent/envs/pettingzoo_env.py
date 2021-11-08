@@ -78,6 +78,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         )
         self.agent_object_mapping = dict(zip(self.possible_agents, agent_list))
         self._robot_sim_ns = [a._robot_sim_ns for a in agent_list]
+        self.terminal_observation = {}
 
         self._validate_agent_list()
 
@@ -117,6 +118,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         """
         self.agents = self.possible_agents[:]
         self.num_moves = 0
+        self.terminal_observation = {}
 
         for agent in self.agents:
             self.agent_object_mapping[agent].reward_calculator.reset()
@@ -189,6 +191,15 @@ class FlatlandPettingZooEnv(ParallelEnv):
         )
 
         self.agents = [agent for agent in self.agents if not dones[agent]]
+
+        for agent in self.possible_agents:
+            if agent in dones and dones[agent]:
+                self.terminal_observation[agent] = merged_obs[agent]
+            if agent not in self.agents:
+                infos[agent] = {}
+                infos[agent]["terminal_observation"] = self.terminal_observation[agent]
+
+
 
         return merged_obs, rewards, dones, infos
 
