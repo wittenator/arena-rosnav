@@ -14,7 +14,10 @@ from stable_baselines3 import PPO
 from supersuit.vector import MakeCPUAsyncConstructor, ConcatVecEnv
 from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
-from rl_agent.utils.supersuit_utils import vec_env_create
+from rl_agent.utils.supersuit_utils import (
+    vec_env_create,
+    MarkovVectorEnv_patched,
+)
 from tools.argsparser import parse_marl_training_args
 from tools.train_agent_utils import (
     get_agent_name,
@@ -124,7 +127,7 @@ def main(args):
             total_timesteps=n_timesteps,
             reset_num_timesteps=True,
             callback=get_evalcallback(
-                env,
+                env=env,
                 num_robots=args.robots,
             ),
         )
@@ -140,29 +143,23 @@ def main(args):
     sys.exit()
 
 
-def get_evalcallback(train_env, num_robots: int) -> MarlEvalCallback:
-    eval_env = env_fn(
-        num_agents=num_robots,
-        ns="eval_sim",
-        agent_list_fn=instantiate_drl_agents,
-        max_num_moves_per_eps=700,
-    )
-
-    eval_env = VecNormalize(
-        eval_env,
-        training=False,
-        norm_obs=True,
-        norm_reward=False,
-        clip_reward=15,
-        clip_obs=3.5,
+def get_evalcallback(num_robots: int, env: VecEnv) -> MarlEvalCallback:
+    eval_env = MarkovVectorEnv_patched(
+        FlatlandPettingZooEnv(
+            num_agents=num_robots,
+            ns="eval_sim",
+            agent_list_fn=instantiate_drl_agents,
+            max_num_moves_per_eps=2000,
+        ),
+        black_death=True,
     )
 
     return MarlEvalCallback(
-        train_env,
-        eval_env,
-        num_robots,
-        n_eval_episodes=5,
-        eval_freq=10,
+        train_env=None,
+        eval_env=eval_env,
+        num_robots=num_robots,
+        n_eval_episodes=10,
+        eval_freq=1,
         deterministic=True,
     )
 

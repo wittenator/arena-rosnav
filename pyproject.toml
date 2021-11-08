@@ -19,7 +19,6 @@ PyYAML = "^5.4.1"
 catkin-pkg = "^0.4.23"
 netifaces = "^0.10.9"
 pathlib = "^1.0.1"
-stable-baselines3 = "^1.0"
 empy = "^3.3.4"
 setuptools = "^56.2.0"
 filelock = "^3.0.12"
@@ -27,6 +26,7 @@ PyQt5 = "^5.15.4"
 scipy = "^1.7.1"
 PettingZoo = "1.13.1"
 SuperSuit = "^3.3.0"
+stable-baselines3 = {git = "https://github.com/ignc-research/stable-baselines3", rev = "marl"}
 
 [tool.poetry.dev-dependencies]
 
