@@ -141,6 +141,7 @@ def main(args):
             callback=get_evalcallback(
                 train_env=env,
                 num_robots=args.robots,
+                paths=PATHS,
             ),
         )
     except KeyboardInterrupt:
@@ -155,7 +156,7 @@ def main(args):
     sys.exit()
 
 
-def get_evalcallback(train_env: VecEnv, num_robots: int) -> MarlEvalCallback:
+def get_evalcallback(train_env: VecEnv, num_robots: int, paths: dict) -> MarlEvalCallback:
     eval_env = env_fn(
         num_agents=num_robots,
         ns="eval_sim",
@@ -176,9 +177,11 @@ def get_evalcallback(train_env: VecEnv, num_robots: int) -> MarlEvalCallback:
         train_env=train_env,
         eval_env=eval_env,
         num_robots=num_robots,
-        n_eval_episodes=1,
-        eval_freq=15000,
+        n_eval_episodes=40,
+        eval_freq=20000,
         deterministic=True,
+        log_path=paths["eval"],
+        best_model_save_path=paths["model"],
         callback_on_new_best=StopTrainingOnRewardThreshold(
             treshhold_type="succ",
             threshold=0.9,
