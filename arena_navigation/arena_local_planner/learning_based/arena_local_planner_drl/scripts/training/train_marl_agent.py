@@ -141,7 +141,7 @@ def main(args):
             callback=get_evalcallback(
                 train_env=env,
                 num_robots=args.robots,
-            )
+            ),
         )
     except KeyboardInterrupt:
         print("KeyboardInterrupt..")
@@ -177,11 +177,11 @@ def get_evalcallback(train_env: VecEnv, num_robots: int) -> MarlEvalCallback:
         eval_env=eval_env,
         num_robots=num_robots,
         n_eval_episodes=5,
-        eval_freq=10000,
+        eval_freq=1,
         deterministic=True,
         callback_on_new_best=StopTrainingOnRewardThreshold(
             treshhold_type="succ", threshold=0.9, verbose=1
-        )
+        ),
     )
 
 
