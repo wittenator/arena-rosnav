@@ -176,11 +176,13 @@ def get_evalcallback(train_env: VecEnv, num_robots: int) -> MarlEvalCallback:
         train_env=train_env,
         eval_env=eval_env,
         num_robots=num_robots,
-        n_eval_episodes=5,
-        eval_freq=10000,
+        n_eval_episodes=1,
+        eval_freq=15000,
         deterministic=True,
         callback_on_new_best=StopTrainingOnRewardThreshold(
-            treshhold_type="succ", threshold=0.9, verbose=1
+            treshhold_type="succ",
+            threshold=0.9,
+            verbose=1,
         )
     )
 

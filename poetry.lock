@@ -573,7 +573,7 @@ tests = ["pytest", "pytest-cov", "pytest-env", "pytest-xdist", "pytype", "flake8
 type = "git"
 url = "https://github.com/ignc-research/stable-baselines3"
 reference = "marl"
-resolved_reference = "81a59b420dd07e4a2a09bc2591d4789f2d688f48"
+resolved_reference = "5f13b10e998d1066b56c7d934df71e99247b5571"
 
 [[package]]
 name = "std-msgs"
