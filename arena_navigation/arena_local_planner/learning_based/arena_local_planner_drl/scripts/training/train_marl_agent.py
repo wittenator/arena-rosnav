@@ -76,6 +76,16 @@ def instantiate_drl_agents(
     hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
     action_space_path: str = DEFAULT_ACTION_SPACE,
 ) -> list:
+    """
+    Function which generates a list agents which handle the ROS connection.
+
+    :param num_robots: Number of robots in the environment
+    :param ns: Name of the environment (used for ROS topics)
+    :param robot_name_prefix: Name whith which to prefix robots in the ROS environment
+    :param hyperparameter_path: Path where to load hyperparameters from
+    :param action_space_path: Path where to load action spaces from
+    """
+
     return [
         TrainingDRLAgent(
             ns=ns,
@@ -157,7 +167,19 @@ def main(args):
     sys.exit()
 
 
-def get_evalcallback(train_env: VecEnv, num_robots: int, PATHS: dict) -> MarlEvalCallback:
+def get_evalcallback(
+        train_env: VecEnv,
+        num_robots: int,
+        PATHS: dict,
+) -> MarlEvalCallback:
+    """
+    Function which which generates a evaluation callback in an evaluation environment.
+
+    :param train_env: Vectorized training environment
+    :param num_robots: Number of robots in the environment
+    :param PATHS: Dictionary which holds hyperparameters for the experiment
+    """
+
     eval_env = env_fn(
         num_agents=num_robots,
         ns="eval_sim",
