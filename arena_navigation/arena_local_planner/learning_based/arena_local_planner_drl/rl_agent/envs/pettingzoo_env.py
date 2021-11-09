@@ -45,8 +45,9 @@ class FlatlandPettingZooEnv(ParallelEnv):
         agent_list_fn: Callable[
             [int, str, str, str, str], List[TrainingDRLAgent]
         ],
+        PATHS: dict,
         ns: str = None,
-        task_mode: str = "random",
+        task_mode: str = "staged",
         max_num_moves_per_eps: int = 1000,
     ) -> None:
         """Initialization method for the Arena-Rosnav Pettingzoo Environment.
@@ -88,6 +89,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             ns=ns,
             mode=task_mode,
             robot_names=self._robot_sim_ns,
+            PATHS=PATHS,
         )
 
         # service clients

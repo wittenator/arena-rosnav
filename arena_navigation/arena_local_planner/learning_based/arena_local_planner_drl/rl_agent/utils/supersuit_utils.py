@@ -51,6 +51,7 @@ def vec_env_create(
     num_robots: int,
     num_cpus: int,
     num_vec_envs: int,
+    PATHS: dict,
 ) -> SB3VecEnvWrapper:
     env_list_fns = [
         partial(
@@ -58,6 +59,7 @@ def vec_env_create(
             ns=f"sim_{i}",
             num_agents=num_robots,
             agent_list_fn=agent_list_fn,
+            PATHS=PATHS,
         )
         for i in range(1, num_vec_envs + 1)
     ]

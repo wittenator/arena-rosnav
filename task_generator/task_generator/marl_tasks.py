@@ -245,8 +245,8 @@ def get_MARL_task(
     ns: str,
     mode: str,
     robot_names: List[str],
+    PATHS: dict,
     start_stage: int = 1,
-    PATHS: dict = None,
 ) -> ABSMARLTask:
     """Function to return desired navigation task manager.
 
