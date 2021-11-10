@@ -5,7 +5,7 @@ import time
 
 from typing import List
 from std_msgs.msg import Bool
-from stable_baselines3.common.callbacks import BaseCallback, EvalCallback
+from stable_baselines3.common.callbacks import BaseCallback, EvalCallback, MarlEvalCallback
 from task_generator.task_generator.tasks import StagedRandomTask
 
 
@@ -94,6 +94,8 @@ class InitiateNewTrainStage(BaseCallback):
     def _on_step(self, EvalObject: EvalCallback) -> bool:
         assert isinstance(
             EvalObject, EvalCallback
+        ) or isinstance(
+            EvalObject, MarlEvalCallback
         ), f"InitiateNewTrainStage must be called within EvalCallback"
 
         if self.activated:
