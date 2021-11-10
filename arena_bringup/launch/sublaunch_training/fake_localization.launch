@@ -83,6 +83,6 @@
   </node>
   <node pkg="tf2_ros" type="static_transform_publisher" name="map_to_odom_tfpublisher_25" ns="$(arg ns)" args="0 0 0 0 0 0 $(arg global_frame_id) $(arg ns)_$(arg base_robot_name)25_$(arg base_odom_frame_id)" if="$(eval num_robots>=25)">
     <remap from="/clock" to="/$(arg ns)/clock"/>
-  </node1
+  </node>
 
 </launch>

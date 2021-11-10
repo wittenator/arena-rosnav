@@ -202,7 +202,7 @@ def get_evalcallback(
         eval_env=eval_env,
         num_robots=num_robots,
         n_eval_episodes=40,
-        eval_freq=100,
+        eval_freq=20000,
         deterministic=True,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
