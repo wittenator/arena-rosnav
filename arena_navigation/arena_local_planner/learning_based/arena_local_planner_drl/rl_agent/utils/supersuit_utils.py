@@ -9,8 +9,7 @@ from supersuit.vector.sb3_vector_wrapper import SB3VecEnvWrapper
 
 
 class MarkovVectorEnv_patched(MarkovVectorEnv):
-    """Patched environment wrapper which creates the correct API for vector environments. Dones for dead agents are returned as True instead as False.
-    """
+    """Patched environment wrapper which creates the correct API for vector environments. Dones for dead agents are returned as True instead as False."""
 
     def step(self, actions):
         agent_set = set(self.par_env.agents)
@@ -56,18 +55,20 @@ def vec_env_create(
     num_vec_envs: int,
     PATHS: dict,
 ) -> SB3VecEnvWrapper:
-    """
-    Function which vectorizes a given environment function in multiple parallel environments.
+    """Function which vectorizes a given environment function in multiple parallel environments.
 
     Args:
-        env_fn: Function that initializes an environment with wrappers
-        agent_list_fn: Object containing the program arguments
-        num_robots: Number of robots in the environment
-        num_cpus: Maximal number of CPUs to use (Currently only process is used anyhow)
-        num_vec_envs: Number of parallel environments to spawn
-        PATHS: Dictionary which holds hyperparameters for the experiment
-    """
+        env_fn (Callable): Function that initializes an environment with wrappers
+        agent_list_fn (Callable): Object containing the program arguments
+        num_robots (int): Number of robots in the environment
+        num_cpus (int): Maximal number of CPUs to use (Currently only process is used anyhow)
+        num_vec_envs (int): Number of parallel environments to spawn
+        PATHS (dict): Dictionary which holds hyperparameters for the experiment
 
+    Returns:
+        SB3VecEnvWrapper: Vectorized environments following the SB3 VecEnv API. Each each robot in an environment \
+            poses as an environment in the vector.
+    """
     env_list_fns = [
         partial(
             env_fn,

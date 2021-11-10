@@ -26,6 +26,7 @@ from tools.train_agent_utils import (
     choose_agent_model,
     initialize_hyperparameters,
 )
+from typing import List
 
 import os, sys, rospy, time
 
@@ -75,20 +76,19 @@ def instantiate_drl_agents(
     robot_name_prefix: str = "robot",
     hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
     action_space_path: str = DEFAULT_ACTION_SPACE,
-) -> list:
+) -> List[TrainingDRLAgent]:
     """Function which generates a list agents which handle the ROS connection.
 
     Args:
-        num_robots: Number of robots in the environment
-        ns: Name of the environment (used for ROS topics)
-        robot_name_prefix: Name whith which to prefix robots in the ROS environment
-        hyperparameter_path: Path where to load hyperparameters from
-        action_space_path: Path where to load action spaces from
+        num_robots (int, optional): Number of robots in the environment. Defaults to 1.
+        ns (str, optional): Name of the namespace (used for ROS topics). Defaults to None.
+        robot_name_prefix (str, optional): Name with which to prefix robots in the ROS environment. Defaults to "robot".
+        hyperparameter_path (str, optional): Path where to load hyperparameters from. Defaults to DEFAULT_HYPERPARAMETER.
+        action_space_path (str, optional): Path where to load action spaces from. Defaults to DEFAULT_ACTION_SPACE.
 
     Returns:
-        A list of initialized agents
+        List[TrainingDRLAgent]: List containing _num\_robots_ agent classes.
     """
-
     return [
         TrainingDRLAgent(
             ns=ns,
@@ -162,31 +162,30 @@ def main(args):
 
 
 def get_evalcallback(
-        train_env: VecEnv,
-        num_robots: int,
-        num_envs: int,
-        task_mode: str,
-        PATHS: dict,
+    train_env: VecEnv,
+    num_robots: int,
+    num_envs: int,
+    task_mode: str,
+    PATHS: dict,
 ) -> MarlEvalCallback:
-    """Function which which generates a evaluation callback in an evaluation environment.
+    """Function which generates an evaluation callback with an evaluation environment.
 
     Args:
-        train_env: Vectorized training environment
-        num_robots: Number of robots in the environment
-        num_envs: Number of environments to spawn
-        num_envs: Task mode for the current experiment
-        PATHS: Dictionary which holds hyperparameters for the experiment
+        train_env (VecEnv): Vectorized training environment
+        num_robots (int): Number of robots in the environment
+        num_envs (int): Number of parallel spawned environments
+        task_mode (str): Task mode for the current experiment
+        PATHS (dict): Dictionary which holds hyperparameters for the experiment
 
     Returns:
-        A callback function which can evaluate a given experiment
+        MarlEvalCallback: [description]
     """
-
     eval_env = env_fn(
         num_agents=num_robots,
         ns="eval_sim",
         agent_list_fn=instantiate_drl_agents,
         max_num_moves_per_eps=700,
-        PATHS=PATHS
+        PATHS=PATHS,
     )
 
     eval_env = VecNormalize(
@@ -219,7 +218,7 @@ def get_evalcallback(
             treshhold_type="succ",
             threshold=0.9,
             verbose=1,
-        )
+        ),
     )
 
 
