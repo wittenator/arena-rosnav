@@ -30,6 +30,7 @@ stable-baselines3 = {git = "https://github.com/ignc-research/stable-baselines3",
 tensorboard = "^2.7.0"
 
 [tool.poetry.dev-dependencies]
+pdoc3 = "^0.10.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

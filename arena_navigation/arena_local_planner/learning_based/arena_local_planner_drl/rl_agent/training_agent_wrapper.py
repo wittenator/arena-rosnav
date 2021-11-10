@@ -49,15 +49,11 @@ class TrainingDRLAgent(BaseDRLAgent):
             from '../simulation_setup/robot/*.model.yaml'
 
         Args:
-            ns (str, optional):
-                Agent name (directory has to be of the same name). Defaults to None.
-            robot_name (str, optional):
-                Robot specific ROS namespace extension. Defaults to None.
-            hyperparameter_path (str, optional):
-                Path to json file containing defined hyperparameters.
+            ns (str, optional): Agent name (directory has to be of the same name). Defaults to None.
+            robot_name (str, optional): Robot specific ROS namespace extension. Defaults to None.
+            hyperparameter_path (str, optional): Path to json file containing defined hyperparameters.\
                 Defaults to DEFAULT_HYPERPARAMETER.
-            action_space_path (str, optional):
-                Path to yaml file containing action space settings.
+            action_space_path (str, optional): Path to yaml file containing action space settings.
                 Defaults to DEFAULT_ACTION_SPACE.
         """
         super().__init__(
@@ -76,8 +72,7 @@ class TrainingDRLAgent(BaseDRLAgent):
         """Retrieves the latest synchronized observation.
 
         Returns:
-            Tuple[np.ndarray, dict]: 
-                Tuple, where first entry depicts the observation data concatenated \
+            Tuple[np.ndarray, dict]: Tuple, where first entry depicts the observation data concatenated \
                 into one array. Second entry represents the observation dictionary.
         """
         return self.observation_collector.get_observations()
@@ -86,8 +81,7 @@ class TrainingDRLAgent(BaseDRLAgent):
         """Publishes an action on 'self._action_pub' (ROS topic).
 
         Args:
-            action (np.ndarray):
-                Action in [linear velocity, angular velocity]
+            action (np.ndarray): Action in [linear velocity, angular velocity]
         """
         if self._agent_params["discrete_action_space"]:
             action = self._get_disc_action(action)

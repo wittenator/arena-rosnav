@@ -128,10 +128,8 @@ class BaseDRLAgent(ABC):
             the action space from respective yaml file.
 
         Args:
-            robot_setting_yaml (str): 
-                Yaml file containing the robot specific settings. 
-            action_space_yaml (str): 
-                Yaml file containing the action space configuration. 
+            robot_setting_yaml (str): Yaml file containing the robot specific settings. 
+            action_space_yaml (str): Yaml file containing the action space configuration. 
         """
         self._num_laser_beams = None
         self._laser_range = None
