@@ -110,10 +110,6 @@ def main(args):
         n_envs=args.n_envs,
     )
 
-    # threshold settings for training curriculum
-    # type can be either 'succ' or 'rew'
-    trainstage_cb =
-
     env = vec_env_create(
         env_fn,
         instantiate_drl_agents,
