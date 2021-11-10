@@ -143,9 +143,7 @@ class StagedMARLRandomTask(RandomMARLTask):
 
         self._initiate_stage()
 
-    def next_stage(
-        self,
-    ):
+    def next_stage(self, *args, **kwargs):
         if self._curr_stage < len(self._stages):
             self._curr_stage = self._curr_stage + 1
             self._initiate_stage()
@@ -162,9 +160,7 @@ class StagedMARLRandomTask(RandomMARLTask):
                 f"({self.ns}) INFO: Tried to trigger next stage but already reached last one"
             )
 
-    def previous_stage(
-        self,
-    ):
+    def previous_stage(self, *args, **kwargs):
         if self._curr_stage > 1:
             rospy.set_param("/last_stage_reached", False)
 
