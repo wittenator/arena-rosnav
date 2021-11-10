@@ -112,14 +112,7 @@ def main(args):
 
     # threshold settings for training curriculum
     # type can be either 'succ' or 'rew'
-    trainstage_cb = InitiateNewTrainStage(
-        n_envs=args.n_envs,
-        treshhold_type="succ",
-        upper_threshold=0.8,
-        lower_threshold=0.6,
-        task_mode=params["task_mode"],
-        verbose=1,
-    )
+    trainstage_cb =
 
     env = vec_env_create(
         env_fn,
@@ -152,6 +145,8 @@ def main(args):
             callback=get_evalcallback(
                 train_env=env,
                 num_robots=args.robots,
+                num_envs=args.n_envs,
+                task_mode=params["task_mode"],
                 PATHS=PATHS,
             ),
         )
@@ -170,6 +165,8 @@ def main(args):
 def get_evalcallback(
         train_env: VecEnv,
         num_robots: int,
+        num_envs: int,
+        task_mode: str,
         PATHS: dict,
 ) -> MarlEvalCallback:
     """
@@ -177,6 +174,8 @@ def get_evalcallback(
 
     :param train_env: Vectorized training environment
     :param num_robots: Number of robots in the environment
+    :param num_envs: Number of environments to spawn
+    :param num_envs: Task mode for the current experiment
     :param PATHS: Dictionary which holds hyperparameters for the experiment
     """
 
@@ -206,6 +205,14 @@ def get_evalcallback(
         deterministic=True,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
+        callback_on_eval_end=InitiateNewTrainStage(
+            n_envs=num_envs,
+            treshhold_type="succ",
+            upper_threshold=0.8,
+            lower_threshold=0.6,
+            task_mode=task_mode,
+            verbose=1,
+        ),
         callback_on_new_best=StopTrainingOnRewardThreshold(
             treshhold_type="succ",
             threshold=0.9,

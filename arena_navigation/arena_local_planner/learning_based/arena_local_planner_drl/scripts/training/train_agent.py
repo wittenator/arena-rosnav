@@ -113,6 +113,7 @@ def main(args):
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],
         deterministic=True,
+        callback_on_eval_end=trainstage_cb,
         callback_on_new_best=stoptraining_cb,
     )
 
