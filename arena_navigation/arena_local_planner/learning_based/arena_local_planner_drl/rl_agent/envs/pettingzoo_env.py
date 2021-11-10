@@ -181,7 +181,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             Afterwards, agents' observations are retrieved from the current timestep and \
             the reward is calculated. \
             Proceeding with the ``RewardCalculator`` processing the observations and detecting certain events like \
-            if a crash occured, a goal was reached. Those informations are returned in the '_reward info_' \
+            if a crash occured, a goal was reached. Those informations are returned in the '*reward\_info*' \
             which itself is a dictionary. \
             Eventually, dictionaries containing every agents' observations, rewards, done flags and \
             episode information is returned.
@@ -195,7 +195,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
         
         Note:
             Done reasons are mapped as follows: __0__ - episode length exceeded, __1__ - agent crashed, \
-                _ _2__ - agent reached its goal.
+                __2__ - agent reached its goal.
         """
         # If a user passes in actions with no agents, then just return empty observations, etc.
         if not actions:
@@ -239,9 +239,7 @@ class FlatlandPettingZooEnv(ParallelEnv):
             # agent is done in this episode
             if agent in dones and dones[agent]:
                 self.terminal_observation[agent] = merged_obs[agent]
-                infos[agent][
-                    "terminal_observation"
-                ] = merged_obs[agent]
+                infos[agent]["terminal_observation"] = merged_obs[agent]
             # agent is done since atleast last episode
             elif agent not in self.agents:
                 if agent not in infos:
