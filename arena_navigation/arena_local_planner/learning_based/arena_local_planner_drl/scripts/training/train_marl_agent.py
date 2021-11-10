@@ -76,14 +76,17 @@ def instantiate_drl_agents(
     hyperparameter_path: str = DEFAULT_HYPERPARAMETER,
     action_space_path: str = DEFAULT_ACTION_SPACE,
 ) -> list:
-    """
-    Function which generates a list agents which handle the ROS connection.
+    """Function which generates a list agents which handle the ROS connection.
 
-    :param num_robots: Number of robots in the environment
-    :param ns: Name of the environment (used for ROS topics)
-    :param robot_name_prefix: Name whith which to prefix robots in the ROS environment
-    :param hyperparameter_path: Path where to load hyperparameters from
-    :param action_space_path: Path where to load action spaces from
+    Args:
+        num_robots: Number of robots in the environment
+        ns: Name of the environment (used for ROS topics)
+        robot_name_prefix: Name whith which to prefix robots in the ROS environment
+        hyperparameter_path: Path where to load hyperparameters from
+        action_space_path: Path where to load action spaces from
+
+    Returns:
+        A list of initialized agents
     """
 
     return [
@@ -165,14 +168,17 @@ def get_evalcallback(
         task_mode: str,
         PATHS: dict,
 ) -> MarlEvalCallback:
-    """
-    Function which which generates a evaluation callback in an evaluation environment.
+    """Function which which generates a evaluation callback in an evaluation environment.
 
-    :param train_env: Vectorized training environment
-    :param num_robots: Number of robots in the environment
-    :param num_envs: Number of environments to spawn
-    :param num_envs: Task mode for the current experiment
-    :param PATHS: Dictionary which holds hyperparameters for the experiment
+    Args:
+        train_env: Vectorized training environment
+        num_robots: Number of robots in the environment
+        num_envs: Number of environments to spawn
+        num_envs: Task mode for the current experiment
+        PATHS: Dictionary which holds hyperparameters for the experiment
+
+    Returns:
+        A callback function which can evaluate a given experiment
     """
 
     eval_env = env_fn(
@@ -197,7 +203,7 @@ def get_evalcallback(
         eval_env=eval_env,
         num_robots=num_robots,
         n_eval_episodes=40,
-        eval_freq=20000,
+        eval_freq=100,
         deterministic=True,
         log_path=PATHS["eval"],
         best_model_save_path=PATHS["model"],

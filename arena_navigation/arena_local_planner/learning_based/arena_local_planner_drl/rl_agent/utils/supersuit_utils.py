@@ -57,15 +57,16 @@ def vec_env_create(
     PATHS: dict,
 ) -> SB3VecEnvWrapper:
     """
-        Function which vectorizes a given environment function in multiple parallel environments.
+    Function which vectorizes a given environment function in multiple parallel environments.
 
-        :param env_fn: Function that initializes an environment with wrappers
-        :param agent_list_fn: Object containing the program arguments
-        :param num_robots: Number of robots in the environment
-        :param num_cpus: Maximal number of CPUs to use (Currently only process is used anyhow)
-        :param num_vec_envs: Number of parallel environments to spawn
-        :param PATHS: Dictionary which holds hyperparameters for the experiment
-        """
+    Args:
+        env_fn: Function that initializes an environment with wrappers
+        agent_list_fn: Object containing the program arguments
+        num_robots: Number of robots in the environment
+        num_cpus: Maximal number of CPUs to use (Currently only process is used anyhow)
+        num_vec_envs: Number of parallel environments to spawn
+        PATHS: Dictionary which holds hyperparameters for the experiment
+    """
 
     env_list_fns = [
         partial(
